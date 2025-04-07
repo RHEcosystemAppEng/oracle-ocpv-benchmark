@@ -1,0 +1,7 @@
+oralab =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST=oralab-standalone1.<>)(PORT=1521))
+    (CONNECT_DATA =
+      (SERVICE_NAME=pdb1)
+    )
+  )

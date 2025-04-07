@@ -1,6 +1,11 @@
-puts "🚀 Starting Oracle TPCC benchmark run..."
+puts "Starting Oracle TPCC benchmark run..."
 
-# Monitor VU completion
+# Oracle environment variables
+set env(TNS_ADMIN) "[file normalize ../oracle-net]"
+set env(ORACLE_HOME) "/usr/lib/oracle/19.26/client64"
+set env(LD_LIBRARY_PATH) "$env(ORACLE_HOME)/lib"
+
+# Wait for all Virtual Users to finish
 global complete
 proc wait_to_complete {} {
     global complete
@@ -12,21 +17,18 @@ proc wait_to_complete {} {
     }
 }
 
-# Set DB to Oracle
+# Set database type
 dbset db ora
 
-# Load driver script
+# Load TPCC driver
 loadscript
 
-# Connection details
+# Connection settings
 diset connection system_user system
 diset connection system_password $env(ORACLE_SYSTEM_PASSWORD)
-diset connection instance $env(ORACLE_SID)
-diset connection service $env(ORACLE_SERVICE)
-diset connection server $env(ORACLE_HOST)
-diset connection port $env(ORACLE_PORT)
+diset connection instance oralab
 
-# Use existing TPCC user
+# TPCC user
 diset tpcc ora_user tpcc
 diset tpcc ora_pass tpcc
 diset tpcc userexists true
@@ -41,13 +43,13 @@ diset tpcc ora_rampup 2
 diset tpcc ora_duration 5
 diset tpcc ora_num_vu 10
 
-# Reload driver with config
+# Reload config
 loadscript
 
-puts "🧾 Configuration:"
+puts "Configuration:"
 print dict
 
-# Virtual User setup
+# VU settings
 vuset vu 10
 vuset unique 1
 vuset timestamps 1
@@ -55,7 +57,7 @@ vuset showoutput 0
 vuset delay 20
 vuset repeat 1
 
-puts "👥 Launching Virtual Users..."
+puts "Launching Virtual Users..."
 vurun
 
 wait_to_complete

@@ -1,3 +1,10 @@
 /hammerdb-setup/.idea/
 ../ocpv/
 ../.DS_Store
+/hammerdb-4.12-rhel8.tar.gz
+/HammerDB-4.12/
+
+/results/*
+!/results/.gitkeep
+
+
