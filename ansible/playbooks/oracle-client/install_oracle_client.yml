@@ -58,10 +58,12 @@
         msg: |
           {% if oracle_home_after.stat.exists and install_required %}
           ✅ Oracle Instant Client was successfully installed.
+          Configure below environment variables:
           ORACLE_HOME={{ oracle_home_after.stat.path }}
           LD_LIBRARY_PATH={{ oracle_home_after.stat.path }}/lib
           {% elif oracle_home_after.stat.exists and not install_required %}
           ⚠️ Oracle Instant Client was already installed — no changes made.
+          Configure below environment variables:
           ORACLE_HOME={{ oracle_home_after.stat.path }}
           LD_LIBRARY_PATH={{ oracle_home_after.stat.path }}/lib
           {% else %}

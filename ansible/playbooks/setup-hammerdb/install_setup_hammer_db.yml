@@ -2,8 +2,8 @@
   hosts: hammerdb-oracle-client-vms
   become: yes
   vars:
-    hammerdb_version: "4.12"  # Updated to the latest version
-    tns_admin_path: "/etc/Hammerdb-oracle-tns"  # Correct relative path
+    hammerdb_version: "4.12"
+    tns_admin_path: "/etc/Hammerdb-oracle-tns"  # tnsnames.ora file path
     oracle_client_home: "/usr/lib/oracle/19.26/client64"
     oracle_tns_name: "ORALAB"  # TNS entry name for Oracle connection
 
