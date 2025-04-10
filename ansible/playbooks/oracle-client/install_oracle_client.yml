@@ -1,0 +1,74 @@
+- name: Install Oracle Instant Client
+  hosts: hammerdb-oracle-client-vms
+  become: yes
+  vars:
+    oracle_major_version: "19.26"
+    oracle_minor_version: "0.0.0-1.el8"
+    tmp_dir: "/tmp"
+    basic_rpm: "oracle-instantclient{{ oracle_major_version }}-basic-{{ oracle_major_version }}.{{ oracle_minor_version }}.x86_64.rpm"
+    sqlplus_rpm: "oracle-instantclient{{ oracle_major_version }}-sqlplus-{{ oracle_major_version }}.{{ oracle_minor_version }}.x86_64.rpm"
+    base_url: "https://yum.oracle.com/repo/OracleLinux/OL8/oracle/instantclient/x86_64/getPackage"
+    oracle_home_path: "/usr/lib/oracle/{{ oracle_major_version }}/client64"
+
+  tasks:
+    - name: Check if Oracle Instant Client is already installed
+      stat:
+        path: "{{ oracle_home_path }}"
+      register: oracle_home
+
+    - name: Set fact if installation is needed
+      set_fact:
+        install_required: "{{ not oracle_home.stat.exists }}"
+
+    - name: Download Basic RPM
+      get_url:
+        url: "{{ base_url }}/{{ basic_rpm }}"
+        dest: "{{ tmp_dir }}/{{ basic_rpm }}"
+        mode: '0644'
+      when: install_required
+
+    - name: Download SQLPlus RPM
+      get_url:
+        url: "{{ base_url }}/{{ sqlplus_rpm }}"
+        dest: "{{ tmp_dir }}/{{ sqlplus_rpm }}"
+        mode: '0644'
+      when: install_required
+
+    - name: Install Basic client RPM
+      dnf:
+        name: "{{ tmp_dir }}/{{ basic_rpm }}"
+        state: present
+        disable_gpg_check: yes
+      when: install_required
+      register: install_basic
+
+    - name: Install SQLPlus RPM
+      dnf:
+        name: "{{ tmp_dir }}/{{ sqlplus_rpm }}"
+        state: present
+        disable_gpg_check: yes
+      when: install_required
+      register: install_sqlplus
+
+    - name: Refresh oracle_home status after install
+      stat:
+        path: "{{ oracle_home_path }}"
+      register: oracle_home_after
+
+    - name: Show Oracle Instant Client installation status
+      debug:
+        msg: |
+          {% if oracle_home_after.stat.exists and install_required %}
+          ✅ Oracle Instant Client was successfully installed.
+          Configure below environment variables:
+          ORACLE_HOME={{ oracle_home_after.stat.path }}
+          LD_LIBRARY_PATH={{ oracle_home_after.stat.path }}/lib
+          {% elif oracle_home_after.stat.exists and not install_required %}
+          ⚠️ Oracle Instant Client was already installed — no changes made.
+          Configure below environment variables:
+          ORACLE_HOME={{ oracle_home_after.stat.path }}
+          LD_LIBRARY_PATH={{ oracle_home_after.stat.path }}/lib
+          {% else %}
+          ❌ Oracle Instant Client installation directory not found at {{ oracle_home_path }}.
+          Something went wrong during the installation.
+          {% endif %}

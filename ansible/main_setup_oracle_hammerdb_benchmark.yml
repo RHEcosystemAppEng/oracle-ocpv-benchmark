@@ -1,0 +1,8 @@
+- name: Install Oracle client and sqlplus
+  import_playbook: playbooks/oracle-client/install_oracle_client.yml
+
+- name: Configure the tnsnames.ora file.
+  import_playbook: playbooks/configure-tnsnames/configure_tnsnames.yml
+
+- name: Install and setup hammerdb for oracle benchmark.
+  import_playbook: playbooks/setup-hammerdb/install_setup_hammer_db.yml
