@@ -1,0 +1,54 @@
+- name: Install and Run HammerDB for Oracle benchmark
+  hosts: hammerdb-oracle-client-vms
+  become: yes
+  vars:
+    hammerdb_version: "4.12"  # Updated to the latest version
+    tns_admin_path: "/etc/Hammerdb-oracle-tns"  # Correct relative path
+    oracle_client_home: "/usr/lib/oracle/19.26/client64"
+    oracle_tns_name: "ORALAB"  # TNS entry name for Oracle connection
+
+  tasks:
+    - name: Install tcl using raw command
+      raw: dnf install -y tcl
+      when: ansible_os_family == "RedHat"
+      args:
+        warn: false  # Disables Ansible's warning about using raw
+
+    - name: Check if HammerDB is already extracted
+      stat:
+        path: "/opt/HammerDB-{{ hammerdb_version }}"
+      register: hammerdb_dir_stat
+
+    - name: Download HammerDB if not already downloaded
+      get_url:
+        url: "https://github.com/TPC-Council/HammerDB/releases/download/v{{ hammerdb_version }}/HammerDB-{{ hammerdb_version }}-RHEL8.tar.gz"
+        dest: "/tmp/HammerDB-{{ hammerdb_version }}.tar.gz"
+      when: hammerdb_dir_stat.stat.exists == false
+
+    - name: Extract HammerDB if not already extracted
+      unarchive:
+        src: "/tmp/HammerDB-{{ hammerdb_version }}.tar.gz"
+        dest: "/opt/"
+        remote_src: yes
+      when: hammerdb_dir_stat.stat.exists == false
+
+    - name: Ensure HammerDB scripts are executable
+      file:
+        path: "/opt/HammerDB-{{ hammerdb_version }}/hammerdbcli"
+        mode: '0755'
+
+    - name: Check if oracle_ocp_benchmark.tcl already exists
+      stat:
+        path: "/opt/HammerDB-{{ hammerdb_version }}/oracle_ocp_benchmark.tcl"
+      register: benchmark_tcl_stat
+
+    - name: Create oracle_ocp_benchmark.tcl from template if not exists
+      template:
+        src: ../../templates/oracle_ocp_benchmark.tcl.j2  # Jinja2 template file
+        dest: "/opt/HammerDB-{{ hammerdb_version }}/oracle_ocp_benchmark.tcl"
+      when: benchmark_tcl_stat.stat.exists == false
+
+    - name: Display message if oracle_ocp_benchmark.tcl already exists
+      debug:
+        msg: "The file oracle_ocp_benchmark.tcl already exists and was not updated."
+      when: benchmark_tcl_stat.stat.exists == true

@@ -1,0 +1,22 @@
+- name: Configure Oracle Client tnsnames.ora
+  hosts: hammerdb-oracle-client-vms
+  become: yes
+  vars:
+    oracle_host: "<REPLACE>"  # Example Oracle host
+    oracle_port: "1521"  # Default Oracle port
+    oracle_sid: "pdb1"  # Example Oracle SID
+    tns_admin_path: "/etc/Hammerdb-oracle-tns"  # Correct relative path
+    oracle_tns_name: "ORALAB"  # TNS entry name for Oracle connection
+
+  tasks:
+    - name: Ensure the {{ tns_admin_path }} directory exists
+      file:
+        path: "{{ tns_admin_path }}"
+        state: directory
+        mode: '0755'
+
+    - name: Create tnsnames.ora file for Oracle client
+      template:
+        src: ../../templates/tnsnames.ora.j2  # Template file containing the TNS entry
+        dest: "{{ tns_admin_path }}/tnsnames.ora"
+        mode: '0644'
