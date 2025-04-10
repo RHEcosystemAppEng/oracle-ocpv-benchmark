@@ -38,6 +38,7 @@
       dnf:
         name: "{{ tmp_dir }}/{{ basic_rpm }}"
         state: present
+        disable_gpg_check: yes
       when: install_required
       register: install_basic
 
@@ -45,6 +46,7 @@
       dnf:
         name: "{{ tmp_dir }}/{{ sqlplus_rpm }}"
         state: present
+        disable_gpg_check: yes
       when: install_required
       register: install_sqlplus
 
