@@ -47,14 +47,6 @@ else
   echo "$FILENAME already downloaded. Skipping."
 fi
 
-#ACTUAL_SHA1=$(sha1sum "$FILENAME" | awk '{print $1}')
-#if [[ "$ACTUAL_SHA1" != "$SHA1" ]]; then
-#  echo "Checksum mismatch:"
-#  echo "  Expected: $SHA1"
-#  echo "  Actual:   $ACTUAL_SHA1"
-#  exit 1
-#fi
-
 echo "Extracting $FILENAME..."
 tar -xvzf $FILENAME
 
