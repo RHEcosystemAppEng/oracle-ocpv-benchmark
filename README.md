@@ -80,6 +80,23 @@ export ORACLE_SYSTEM_PASSWORD=yourpassword
 ./run.sh
 ```
 
+### Run with Profiles
+
+The scripts currently support three profiles: small, medium, and large.
+
+Use them to control load size (virtual users, warehouses, duration, etc.) by editing `profile.sh` file
+
+```bash
+PROFILE=small ./build.sh
+PROFILE=small ./run.sh
+```
+Or run both in a single step:
+
+```PROFILE=small ./build-and-run.sh```
+
+**Note**: Required to cleannup the schema before running each profile
+
+
 ### Output
 
 Logs are saved to:

@@ -2,19 +2,28 @@
 set -euo pipefail
 
 HAMMERDB_VERSION=${HAMMERDB_VERSION:-4.12}
-isodate=$(date +"%Y-%m-%dT%H:%M:%S")
-BENCHNAME=${BENCHNAME:-${isodate}}
+BENCHNAME=${BENCHNAME:-$(date +"%Y-%m-%dT%H:%M:%S")}
+PROFILE=${PROFILE:-small}
+
+source ./profile.sh
+
 export ORACLE_SYSTEM_PASSWORD=<>
+
+export ORA_TPCC_USER=${ORA_TPCC_USER:-tpcc}
+export ORA_TPCC_PASS=${ORA_TPCC_PASS:-tpcc}
+export ORACLE_INSTANCE=${ORACLE_INSTANCE:-oralab}
+export ORA_TABLESPACE=${ORA_TABLESPACE:-USERS}
+export ORA_STORAGE=${ORA_STORAGE:-DEFAULT}
+export ORA_DURABILITY=${ORA_DURABILITY:-nologging}
+
 mkdir -p results
 
 ./install-hammerdb.sh "$HAMMERDB_VERSION"
-#./oracle-env.sh
+
 start_time=$(date +%s)
 
-if ! (cd "HammerDB-$HAMMERDB_VERSION" && ./hammerdbcli auto ../build.tcl | tee "../results/hammerdb_build_${BENCHNAME}.log"); then
-  echo "HammerDB build failed"
-  exit 1
-fi
+cd "HammerDB-$HAMMERDB_VERSION"
+./hammerdbcli auto ../build.tcl | tee "../results/hammerdb_build_${BENCHNAME}.log"
 
 end_time=$(date +%s)
-echo "Elapsed: $((end_time - start_time)) seconds"
+echo "Build completed in $((end_time - start_time)) seconds"

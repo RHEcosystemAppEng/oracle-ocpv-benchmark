@@ -26,31 +26,21 @@ loadscript
 # Connection settings
 diset connection system_user system
 diset connection system_password $env(ORACLE_SYSTEM_PASSWORD)
-diset connection instance oralab
+diset connection instance [expr {[info exists ::env(ORACLE_INSTANCE)] ? $::env(ORACLE_INSTANCE) : "oralab"}]
 
-# TPCC user
-diset tpcc ora_user tpcc
-diset tpcc ora_pass tpcc
-diset tpcc userexists true
-
-# Workload config
-diset tpcc ora_storedprocs true
-diset tpcc ora_timeprofile true
-diset tpcc ora_raiseerror true
-diset tpcc ora_allwarehouse false
-diset tpcc ora_driver timed
-diset tpcc ora_rampup 2
-diset tpcc ora_duration 5
-diset tpcc ora_num_vu 10
-
-# Reload config
-loadscript
+diset tpcc ora_driver       timed
+diset tpcc ora_num_vu       [expr {[info exists ::env(ORA_NUM_VU)] ? $::env(ORA_NUM_VU) : 10}]
+diset tpcc ora_count_ware   [expr {[info exists ::env(ORA_COUNT_WARE)] ? $::env(ORA_COUNT_WARE) : 10}]
+diset tpcc ora_rampup       [expr {[info exists ::env(ORA_RAMPUP)] ? $::env(ORA_RAMPUP) : 2}]
+diset tpcc ora_duration     [expr {[info exists ::env(ORA_DURATION)] ? $::env(ORA_DURATION) : 5}]
+diset tpcc ora_allwarehouse [expr {[info exists ::env(ORA_ALLWAREHOUSE)] ? $::env(ORA_ALLWAREHOUSE) : "false"}]
+diset tpcc ora_timeprofile  true
+diset tpcc ora_raiseerror   true
 
 puts "Configuration:"
 print dict
 
-# VU settings
-vuset vu 10
+vuset vu $::env(ORA_NUM_VU)
 vuset unique 1
 vuset timestamps 1
 vuset showoutput 0
