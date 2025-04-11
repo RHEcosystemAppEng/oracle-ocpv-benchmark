@@ -9,18 +9,20 @@ set env(LD_LIBRARY_PATH) "$env(ORACLE_HOME)/lib"
 # System user connection
 diset connection system_user system
 diset connection system_password $env(ORACLE_SYSTEM_PASSWORD)
-diset connection instance oralab
+diset connection instance [expr {[info exists ::env(ORACLE_INSTANCE)] ? $::env(ORACLE_INSTANCE) : "oralab"}]
 
-# TPCC schema settings
-diset tpcc ora_user tpcc
-diset tpcc ora_pass tpcc
-diset tpcc ora_tablespace USERS
-diset tpcc ora_storage "DEFAULT"
-diset tpcc ora_count_ware 10
-diset tpcc ora_num_vu 10
-diset tpcc ora_durability nologging
+diset tpcc ora_user        [expr {[info exists ::env(ORA_TPCC_USER)] ? $::env(ORA_TPCC_USER) : "tpcc"}]
+diset tpcc ora_pass        [expr {[info exists ::env(ORA_TPCC_PASS)] ? $::env(ORA_TPCC_PASS) : "tpcc"}]
+diset tpcc ora_tablespace  [expr {[info exists ::env(ORA_TABLESPACE)] ? $::env(ORA_TABLESPACE) : "USERS"}]
+diset tpcc ora_storage     [expr {[info exists ::env(ORA_STORAGE)] ? $::env(ORA_STORAGE) : "DEFAULT"}]
+diset tpcc ora_count_ware  [expr {[info exists ::env(ORA_COUNT_WARE)] ? $::env(ORA_COUNT_WARE) : 10}]
+diset tpcc ora_num_vu      [expr {[info exists ::env(ORA_NUM_VU)] ? $::env(ORA_NUM_VU) : 10}]
+diset tpcc ora_durability  [expr {[info exists ::env(ORA_DURABILITY)] ? $::env(ORA_DURABILITY) : "nologging"}]
 
-# Build the TPCC schema
+puts "\nBuild configuration:"
+print dict
+
+puts "Launching schema build..."
 buildschema
 
 # Wait for schema build to finish
