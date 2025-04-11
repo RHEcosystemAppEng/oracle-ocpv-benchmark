@@ -3,8 +3,10 @@
 ../.DS_Store
 /hammerdb-4.12-rhel8.tar.gz
 /HammerDB-4.12/
-
+.idea/
 /results/*
 !/results/.gitkeep
+!/oracle-net/.gitkeep
+/oracle-net/*
 
 
