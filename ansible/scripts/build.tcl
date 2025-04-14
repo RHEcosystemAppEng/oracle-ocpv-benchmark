@@ -1,5 +1,5 @@
 # Set DB type to Oracle
-dbset db ora
+dbset db ORALAB
 
 # Oracle environment
 set env(TNS_ADMIN) "[file normalize ../oracle-net]"

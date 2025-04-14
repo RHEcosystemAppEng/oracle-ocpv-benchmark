@@ -67,3 +67,6 @@
           src: ../../scripts/
           dest: "{{ hammerdb_path }}/benchmark_scripts"
           mode: '0755'
+
+    - name: Make all shell scripts under benchmark_scripts executable
+      ansible.builtin.command: find {{ hammerdb_path }}/benchmark_scripts -name "*.sh" -exec chmod 0755 {} +
