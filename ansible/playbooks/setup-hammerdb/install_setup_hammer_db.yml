@@ -1,9 +1,11 @@
-- name: Install and Run HammerDB for Oracle benchmark
+- name: Install and Setup HammerDB for Oracle Benchmark
   hosts: hammerdb-oracle-client-vms
   become: yes
   vars:
     hammerdb_version: "4.12"
-    tns_admin_path: "/etc/Hammerdb-oracle-tns"  # tnsnames.ora file path
+    hammerdb_base_path: "/opt/HammerDB"
+    hammerdb_path: "{{ hammerdb_base_path }}/{{ hammerdb_version }}"
+    tns_admin_path: "/opt/HammerDB/hammerdb-oracle-tns"  # tnsnames.ora file path
     oracle_client_home: "/usr/lib/oracle/19.26/client64"
     oracle_tns_name: "ORALAB"  # TNS entry name for Oracle connection
 
@@ -16,7 +18,7 @@
 
     - name: Check if HammerDB is already extracted
       stat:
-        path: "/opt/HammerDB-{{ hammerdb_version }}"
+        path: "{{ hammerdb_path }}"
       register: hammerdb_dir_stat
 
     - name: Download HammerDB if not already downloaded
@@ -25,30 +27,43 @@
         dest: "/tmp/HammerDB-{{ hammerdb_version }}.tar.gz"
       when: hammerdb_dir_stat.stat.exists == false
 
+    - name: Ensure HammerDB target path exists
+      file:
+        path: "{{ hammerdb_path }}"
+        state: directory
+        mode: '0755'
+
     - name: Extract HammerDB if not already extracted
       unarchive:
         src: "/tmp/HammerDB-{{ hammerdb_version }}.tar.gz"
-        dest: "/opt/"
+        dest: "{{ hammerdb_path }}"
         remote_src: yes
+        extra_opts: [--strip-components=1]
       when: hammerdb_dir_stat.stat.exists == false
 
     - name: Ensure HammerDB scripts are executable
       file:
-        path: "/opt/HammerDB-{{ hammerdb_version }}/hammerdbcli"
+        path: "{{ hammerdb_path }}/hammerdbcli"
         mode: '0755'
 
     - name: Check if oracle_ocp_benchmark.tcl already exists
       stat:
-        path: "/opt/HammerDB-{{ hammerdb_version }}/oracle_ocp_benchmark.tcl"
+        path: "{{ hammerdb_path }}/oracle_ocp_benchmark.tcl"
       register: benchmark_tcl_stat
 
     - name: Create oracle_ocp_benchmark.tcl from template if not exists
       template:
         src: ../../templates/oracle_ocp_benchmark.tcl.j2  # Jinja2 template file
-        dest: "/opt/HammerDB-{{ hammerdb_version }}/oracle_ocp_benchmark.tcl"
+        dest: "{{ hammerdb_path }}/oracle_ocp_benchmark.tcl"
       when: benchmark_tcl_stat.stat.exists == false
 
     - name: Display message if oracle_ocp_benchmark.tcl already exists
       debug:
         msg: "The file oracle_ocp_benchmark.tcl already exists and was not updated."
       when: benchmark_tcl_stat.stat.exists == true
+
+    - name: Copy scripts directory to target vm's benchmark_scripts folder recursively
+      copy:
+          src: ../../scripts/
+          dest: "{{ hammerdb_path }}/benchmark_scripts"
+          mode: '0755'

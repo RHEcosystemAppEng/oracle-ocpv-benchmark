@@ -5,8 +5,10 @@
     oracle_host: "<REPLACE>"
     oracle_port: "1521"
     oracle_sid: "pdb1"
-    tns_admin_path: "/etc/Hammerdb-oracle-tns"  # path to place tnsnames.ora file
+    hammerdb_base_path: "/opt/HammerDB"
+    tns_admin_path: "{{ hammerdb_base_path }}/hammerdb-oracle-tns"  # path to place tnsnames.ora file
     oracle_tns_name: "ORALAB"  # TNS entry name for Oracle connection
+
 
   tasks:
     - name: Ensure the {{ tns_admin_path }} directory exists

@@ -7,7 +7,7 @@ PROFILE=${PROFILE:-small}
 
 source ./profile.sh
 
-export ORACLE_SYSTEM_PASSWORD=<>
+export ORACLE_SYSTEM_PASSWORD=${ORACLE_SYSTEM_PASSWORD:-ChanegPassw0rd}
 
 export ORA_TPCC_USER=${ORA_TPCC_USER:-tpcc}
 export ORA_TPCC_PASS=${ORA_TPCC_PASS:-tpcc}
@@ -18,12 +18,10 @@ export ORA_DURABILITY=${ORA_DURABILITY:-nologging}
 
 mkdir -p results
 
-./install-hammerdb.sh "$HAMMERDB_VERSION"
-
 start_time=$(date +%s)
 
 cd "HammerDB-$HAMMERDB_VERSION"
-./hammerdbcli auto ../build.tcl | tee "../results/hammerdb_build_${BENCHNAME}.log"
+./hammerdbcli auto build.tcl | tee "../results/hammerdb_build_${BENCHNAME}.log"
 
 end_time=$(date +%s)
 echo "Build completed in $((end_time - start_time)) seconds"

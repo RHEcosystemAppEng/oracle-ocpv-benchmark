@@ -8,9 +8,9 @@ PROFILE=${PROFILE:-small}
 
 source ./profile.sh
 
-export ORACLE_SYSTEM_PASSWORD=<>
+export ORACLE_SYSTEM_PASSWORD=${ORACLE_SYSTEM_PASSWORD:-ChanegPassw0rd}
 mkdir -p results/
 
-(cd "HammerDB-$HAMMERDB_VERSION" && time ./hammerdbcli auto ../run.tcl | tee "../results/hammerdb_run_${BENCHNAME}.log")
+(cd "HammerDB-$HAMMERDB_VERSION" && time ./hammerdbcli auto run.tcl | tee "../results/hammerdb_run_${BENCHNAME}.log")
 
 grep -oP '[0-9]+(?= NOPM)' "./results/hammerdb_run_${BENCHNAME}.log" | tee -a "./results/hammerdb_nopm_${BENCHNAME}.log"
