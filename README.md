@@ -93,6 +93,7 @@ PROFILE=small ./run.sh
 Or run both in a single step:
 
 ```PROFILE=small ./build-and-run.sh```
+```PROFILE=scale-run ./build-and-run.sh```
 
 **Note**: Required to cleannup the schema before running each profile
 
