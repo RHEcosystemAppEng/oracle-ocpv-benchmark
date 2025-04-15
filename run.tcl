@@ -20,6 +20,8 @@ proc wait_to_complete {} {
 # Set database type
 dbset db ora
 
+set profile_id [expr {[info exists ::env(HDB_PROFILE_ID)] ? $::env(HDB_PROFILE_ID) : 0}]
+
 # Load TPCC driver
 loadscript
 
