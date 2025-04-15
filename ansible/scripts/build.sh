@@ -12,6 +12,10 @@ source ./profile.sh
 
 mkdir -p results
 
+# dropping the tpcc schema before test run. and ignore the error.
+echo "Before starting the benchmark...deleting the oracle user tpcc."
+./drop_tpcc_user.sh || echo "Ignoring failure in drop_tpcc_user.sh"
+
 start_time=$(date +%s)
 
 cd "./../4.12"
