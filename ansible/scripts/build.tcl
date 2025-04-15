@@ -2,7 +2,6 @@
 dbset db ora
 
 # Oracle environment
-set env(TNS_ADMIN) "/opt/HammerDB/hammerdb-oracle-tns"
 set env(ORACLE_HOME) "/usr/lib/oracle/19.26/client64"
 set env(LD_LIBRARY_PATH) "$env(ORACLE_HOME)/lib"
 
