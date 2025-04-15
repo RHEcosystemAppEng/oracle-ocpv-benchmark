@@ -14,8 +14,8 @@ mkdir -p results
 
 start_time=$(date +%s)
 
-cd ".."
-./hammerdbcli auto benchmark_scripts/build.tcl | tee "benchmark_scripts/results/hammerdb_build_${BENCHNAME}.log"
+cd "./../4.12"
+./hammerdbcli auto ./../benchmark_scripts/build.tcl | tee "./../benchmark_scripts/results/hammerdb_build_${BENCHNAME}.log"
 
 end_time=$(date +%s)
 echo "Build completed in $((end_time - start_time)) seconds"
