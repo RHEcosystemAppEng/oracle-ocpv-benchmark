@@ -41,16 +41,11 @@
         extra_opts: [--strip-components=1]
       when: hammerdb_dir_stat.stat.exists == false
 
-    - name: Ensure HammerDB scripts are executable
-      file:
-        path: "{{ hammerdb_path }}/hammerdbcli"
-        mode: '0755'
-
     - name: Copy scripts directory to target vm's benchmark_scripts folder recursively
       copy:
           src: ../../scripts/
           dest: "{{ hammerdb_path }}/benchmark_scripts"
           mode: '0755'
 
-    - name: Make all shell scripts under benchmark_scripts executable
-      ansible.builtin.command: find {{ hammerdb_path }}/benchmark_scripts -name "*.sh" -exec chmod 0755 {} +
+    - name: Recursively change ownership and permissions so that scripts are executable.
+      ansible.builtin.command: chown -R cloud-user:cloud-user {{ hammerdb_path }}/benchmark_scripts
