@@ -7,12 +7,18 @@ This repo automates Oracle TPC-C benchmark runs using HammerDB. It includes a se
 Github Project Structure:
 ```
 └── ansible
-    ├── playbooks
-    │   ├── configure-tnsnames
-    │   ├── oracle-client
-    │   └── setup-hammerdb
+    ├── playbooks                                # Ansible playbooks
+    │   ├── configure-tnsnames                   # Ansible playbook to configure tnsnames.ora file 
+    │   ├── oracle-client                        # Ansble playbook to install oracle client
+    │   └── setup-hammerdb                       # Ansible playbook to install hammerdb and copy the necessary custom scripts under scripts directory to VM.  
     ├── scripts
-    └── templates
+    │   ├── build.sh                             # Builds TPCC schema
+    │   ├── run.sh                               # Runs workload benchmark
+    │   ├── build-and-run.sh                     # Builds and Runs workload benchmark
+    │   ├── build.tcl                            # TCL script for schema creation
+    │   ├── run.tcl                              # TCL script to run the test
+    │
+    └── templates                                # Ansible templates
 ```
 
 ## Requirements
@@ -65,7 +71,7 @@ export ORACLE_INSTANCE=${ORACLE_INSTANCE:-ORALAB}
 ```
 
 ## Running the Benchmark
-Go to folder `/opt/HammerDB/benchmark_scripts` on the client VM.
+Go to folder `/opt/HammerDB/4.12/benchmark_scripts` on the client VM.
 ### Build the schema
 ```bash
 ./build.sh
