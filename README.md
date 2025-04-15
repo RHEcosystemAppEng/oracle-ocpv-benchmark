@@ -42,11 +42,10 @@ Now your target VM should have set up the project structure as below. All the de
 `hammerdb-oracle-tns` will have the tnsnames.ora file.
 
 ```shell
-[cloud-user@lrangine-vm01 HammerDB]$ tree -d -L 2 /opt/HammerDB
+[cloud-user@lrangine-vm01 opt]$ tree -d -L 2 /opt/HammerDB
 /opt/HammerDB
 |-- 4.12
 |   |-- agent
-|   |-- benchmark_scripts
 |   |-- bin
 |   |-- config
 |   |-- images
@@ -55,7 +54,11 @@ Now your target VM should have set up the project structure as below. All the de
 |   |-- modules
 |   |-- scripts
 |   `-- src
+|-- benchmark_scripts
+|   `-- results
 `-- hammerdb-oracle-tns
+
+13 directories
 ```
 
 ### 2. Environment Variables
@@ -115,7 +118,8 @@ need to create the CSV output then Run:
 ## Resetting the Schema
 
 ```sql
-DROP USER tpcc CASCADE;
+-- Run the [drop_tpcc_user.sh](ansible/scripts/drop_tpcc_user.sh) script on target client VM. Usually it will be under `/opt/HammerDB/benchmark_scripts`. This script drops the tpcc schema/user.
+./drop_tpcc_user.sh
 ```
 
 ## Common Issues
