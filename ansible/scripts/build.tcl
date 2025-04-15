@@ -2,14 +2,14 @@
 dbset db ora
 
 # Oracle environment
-set env(TNS_ADMIN) "[file normalize ../oracle-net]"
+set env(TNS_ADMIN) "/opt/HammerDB/hammerdb-oracle-tns"
 set env(ORACLE_HOME) "/usr/lib/oracle/19.26/client64"
 set env(LD_LIBRARY_PATH) "$env(ORACLE_HOME)/lib"
 
 # System user connection
 diset connection system_user system
 diset connection system_password $env(ORACLE_SYSTEM_PASSWORD)
-diset connection instance [expr {[info exists ::env(ORACLE_INSTANCE)] ? $::env(ORACLE_INSTANCE) : "oralab"}]
+diset connection instance [expr {[info exists ::env(ORACLE_INSTANCE)] ? $::env(ORACLE_INSTANCE) : "ORALAB"}]
 
 diset tpcc ora_user        [expr {[info exists ::env(ORA_TPCC_USER)] ? $::env(ORA_TPCC_USER) : "tpcc"}]
 diset tpcc ora_pass        [expr {[info exists ::env(ORA_TPCC_PASS)] ? $::env(ORA_TPCC_PASS) : "tpcc"}]

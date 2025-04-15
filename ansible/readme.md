@@ -102,7 +102,7 @@ ansible-playbook -i inventory.ini playbooks/oracle-client/install_oracle_client.
 ansible-playbook -i inventory.ini playbooks/configure-tnsnames/configure_tnsnames.yml
 
 # Run below command to set up and configure the hammerdb for oracle benchmark.
-ansible-playbook -i inventory.ini playbooks/oracle-client/install_setup_hammer_db.yml
+ansible-playbook -i inventory.ini playbooks/setup-hammerdb/install_setup_hammer_db.yml
 ```
 
 
