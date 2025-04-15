@@ -74,7 +74,7 @@ export ORACLE_INSTANCE=${ORACLE_INSTANCE:-ORALAB}
 ```
 
 ## Running the Benchmark
-Go to folder `/opt/HammerDB/4.12/benchmark_scripts` on the client VM.
+Go to folder `/opt/HammerDB/benchmark_scripts` on the client VM.
 ### Build the schema
 ```bash
 ./build.sh
