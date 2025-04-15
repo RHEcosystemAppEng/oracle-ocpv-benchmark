@@ -1,23 +1,14 @@
 #!/bin/bash
 set -euo pipefail
 
-HAMMERDB_VERSION=${HAMMERDB_VERSION:-4.12}
-BENCHNAME=${BENCHNAME:-$(date +"%Y-%m-%dT%H:%M:%S")}
-PROFILE=${PROFILE:-small}
+# Load environment variables from .env if it exists
+if [[ -f ".env" ]]; then
+  set -a
+  source .env
+  set +a
+fi
 
 source ./profile.sh
-
-export ORACLE_SYSTEM_PASSWORD=${ORACLE_SYSTEM_PASSWORD:-ChanegPassw0rd}
-
-export ORA_TPCC_USER=${ORA_TPCC_USER:-tpcc}
-export ORA_TPCC_PASS=${ORA_TPCC_PASS:-tpcc}
-export ORACLE_INSTANCE=${ORACLE_INSTANCE:-oralab}
-export ORA_TABLESPACE=${ORA_TABLESPACE:-USERS}
-export ORA_STORAGE=${ORA_STORAGE:-DEFAULT}
-export ORA_DURABILITY=${ORA_DURABILITY:-nologging}
-
-export TNS_ADMIN=/opt/HammerDB/hammerdb-oracle-tns/
-
 
 mkdir -p results
 

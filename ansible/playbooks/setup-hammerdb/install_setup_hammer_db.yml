@@ -46,22 +46,6 @@
         path: "{{ hammerdb_path }}/hammerdbcli"
         mode: '0755'
 
-    - name: Check if oracle_ocp_benchmark.tcl already exists
-      stat:
-        path: "{{ hammerdb_path }}/oracle_ocp_benchmark.tcl"
-      register: benchmark_tcl_stat
-
-    - name: Create oracle_ocp_benchmark.tcl from template if not exists
-      template:
-        src: ../../templates/oracle_ocp_benchmark.tcl.j2  # Jinja2 template file
-        dest: "{{ hammerdb_path }}/oracle_ocp_benchmark.tcl"
-      when: benchmark_tcl_stat.stat.exists == false
-
-    - name: Display message if oracle_ocp_benchmark.tcl already exists
-      debug:
-        msg: "The file oracle_ocp_benchmark.tcl already exists and was not updated."
-      when: benchmark_tcl_stat.stat.exists == true
-
     - name: Copy scripts directory to target vm's benchmark_scripts folder recursively
       copy:
           src: ../../scripts/
