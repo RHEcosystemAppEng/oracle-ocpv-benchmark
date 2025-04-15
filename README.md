@@ -4,72 +4,77 @@ This repo automates Oracle TPC-C benchmark runs using HammerDB. It includes a se
 
 ## Project Structure
 
+Github Project Structure:
 ```
-hammerdb-setup/
-├── HammerDB-4.12/               # HammerDB CLI (extracted)
-├── install-hammerdb.sh          # Installs HammerDB if not present
-├── build.sh                     # Builds TPCC schema
-├── run.sh                       # Runs workload benchmark
-├── build.tcl                    # TCL script for schema creation
-├── run.tcl                      # TCL script to run the test
-├── oracle-net/
-│   └── tnsnames.ora             # Optional Oracle TNS config
-├── results/                     # Benchmark results/logs
+└── ansible
+    ├── playbooks                                # Ansible playbooks
+    │   ├── configure-tnsnames                   # Ansible playbook to configure tnsnames.ora file 
+    │   ├── oracle-client                        # Ansble playbook to install oracle client
+    │   └── setup-hammerdb                       # Ansible playbook to install hammerdb and copy the necessary custom scripts under scripts directory to VM.  
+    ├── scripts
+    │   ├── build.sh                             # Builds TPCC schema
+    │   ├── run.sh                               # Runs workload benchmark
+    │   ├── build-and-run.sh                     # Builds and Runs workload benchmark
+    │   ├── build.tcl                            # TCL script for schema creation
+    │   ├── run.tcl                              # TCL script to run the test
+    │
+    └── templates                                # Ansible templates
 ```
 
 ## Requirements
 
-- **One-Time Installation Oracle Instant Client (version 19+ via `dnf`)**. You can install it using below script :
-
-```shell
-
-./install-oracle-client.sh
-
-
-```
-- Oracle DB should be reachable from your test environment (VM or OCPV). Make sure you can connect with `sqlplus` before running HammerDB.
-- The following packages are auto-installed via `build.sh`:
-    - `tcl`, `tcl-devel`, `libaio`, `curl`, `unzip`
-
+* Ansible version <2.10. Tested from macbook pro M3.
 
 ## Configuration
 
-### 1. TNS Alias (`tnsnames.ora`)
+### 1. Initial Setup using Ansible
+Please check the readme to set up in [ansible](ansible) for detailed instructions. You need ansible<2.10 version to be compatible with RHEL 8 VM.
 
-Edit the `tnsnames.ora` in `oracle-net/` to match your environment:
+Update the target vm details in ansible inventory.ini. Below playbook installs oracle client, hammer DB and copies all the scripts to target VM.
 
-```ora
-oralab =
-  (DESCRIPTION =
-    (ADDRESS = (PROTOCOL = TCP)(HOST=yourhost)(PORT=1521))
-    (CONNECT_DATA =
-      (SERVICE_NAME = pdb1) -- Replace with your actual service name
-    )
-  )
+```shell
+#Run the playbook to install all required dependencies.
+cd ansible
+ansible-playbook -i inventory.ini main_setup_oracle_hammerdb_benchmark.yml
 ```
 
-### 2. HammerDB Connection Setup (`build.tcl` / `run.tcl`)
+Now your target VM should have set up the project structure as below. All the dependencies will be inside `/opt/HammerDB` path. `benchmark_scripts` folder will have all the custom scripts to run the benchmark.
+`hammerdb-oracle-tns` will have the tnsnames.ora file.
 
-```tcl
-set env(TNS_ADMIN) "[file normalize ./oracle-net]"
-set env(ORACLE_HOME) "/usr/lib/oracle/19.26/client64"
-set env(LD_LIBRARY_PATH) "$env(ORACLE_HOME)/lib"
+```shell
+[cloud-user@lrangine-vm01 opt]$ tree -d -L 2 /opt/HammerDB
+/opt/HammerDB
+|-- 4.12
+|   |-- agent
+|   |-- bin
+|   |-- config
+|   |-- images
+|   |-- include
+|   |-- lib
+|   |-- modules
+|   |-- scripts
+|   `-- src
+|-- benchmark_scripts
+|   `-- results
+`-- hammerdb-oracle-tns
 
-diset connection instance oralab
-diset connection system_user system
-diset connection system_password $env(ORACLE_SYSTEM_PASSWORD)
+13 directories
 ```
 
-### 3. Environment Variables
+### 2. Environment Variables
 
-In both `build.sh` and `run.sh`, export the Oracle password for the `system` user:
+You have .env file to set up all the environment variables required for the benchmark.
+Please update below environemnt variables:
 
 ```bash
+#password for oracle system user.
 export ORACLE_SYSTEM_PASSWORD=yourpassword
+export TNS_ADMIN=/opt/HammerDB/hammerdb-oracle-tns/
+export ORACLE_INSTANCE=${ORACLE_INSTANCE:-ORALAB}
 ```
 
 ## Running the Benchmark
-
+Go to folder `/opt/HammerDB/benchmark_scripts` on the client VM.
 ### Build the schema
 ```bash
 ./build.sh
@@ -113,7 +118,8 @@ need to create the CSV output then Run:
 ## Resetting the Schema
 
 ```sql
-DROP USER tpcc CASCADE;
+-- Run the [drop_tpcc_user.sh](ansible/scripts/drop_tpcc_user.sh) script on target client VM. Usually it will be under `/opt/HammerDB/benchmark_scripts`. This script drops the tpcc schema/user.
+./drop_tpcc_user.sh
 ```
 
 ## Common Issues

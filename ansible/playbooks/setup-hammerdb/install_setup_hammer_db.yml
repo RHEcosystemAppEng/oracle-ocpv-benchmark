@@ -41,32 +41,11 @@
         extra_opts: [--strip-components=1]
       when: hammerdb_dir_stat.stat.exists == false
 
-    - name: Ensure HammerDB scripts are executable
-      file:
-        path: "{{ hammerdb_path }}/hammerdbcli"
-        mode: '0755'
-
-    - name: Check if oracle_ocp_benchmark.tcl already exists
-      stat:
-        path: "{{ hammerdb_path }}/oracle_ocp_benchmark.tcl"
-      register: benchmark_tcl_stat
-
-    - name: Create oracle_ocp_benchmark.tcl from template if not exists
-      template:
-        src: ../../templates/oracle_ocp_benchmark.tcl.j2  # Jinja2 template file
-        dest: "{{ hammerdb_path }}/oracle_ocp_benchmark.tcl"
-      when: benchmark_tcl_stat.stat.exists == false
-
-    - name: Display message if oracle_ocp_benchmark.tcl already exists
-      debug:
-        msg: "The file oracle_ocp_benchmark.tcl already exists and was not updated."
-      when: benchmark_tcl_stat.stat.exists == true
-
     - name: Copy scripts directory to target vm's benchmark_scripts folder recursively
       copy:
           src: ../../scripts/
-          dest: "{{ hammerdb_path }}/benchmark_scripts"
+          dest: "{{ hammerdb_base_path }}/benchmark_scripts"
           mode: '0755'
 
-    - name: Make all shell scripts under benchmark_scripts executable
-      ansible.builtin.command: find {{ hammerdb_path }}/benchmark_scripts -name "*.sh" -exec chmod 0755 {} +
+    - name: Recursively change ownership and permissions so that scripts are executable.
+      ansible.builtin.command: chown -R cloud-user:cloud-user {{ hammerdb_base_path }}/benchmark_scripts
