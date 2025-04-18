@@ -7,7 +7,7 @@ PROFILE=${PROFILE:-small}
 
 source ./profile.sh
 
-export ORACLE_SYSTEM_PASSWORD=<>
+export ORACLE_SYSTEM_PASSWORD=Chang4On
 
 export ORA_TPCC_USER=${ORA_TPCC_USER:-tpcc}
 export ORA_TPCC_PASS=${ORA_TPCC_PASS:-tpcc}
@@ -21,6 +21,12 @@ mkdir -p results
 ./install-hammerdb.sh "$HAMMERDB_VERSION"
 
 start_time=$(date +%s)
+
+echo "-----------------------------"
+echo "WAREHOUSES:      $ORA_COUNT_WARE"
+echo "-----------------------------"
+
+
 
 cd "HammerDB-$HAMMERDB_VERSION"
 ./hammerdbcli auto ../build.tcl | tee "../results/hammerdb_build_${BENCHNAME}.log"
