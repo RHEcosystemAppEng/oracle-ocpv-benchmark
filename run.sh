@@ -8,7 +8,16 @@ PROFILE=${PROFILE:-small}
 
 source ./profile.sh
 
-export ORACLE_SYSTEM_PASSWORD=<>
+export ORACLE_SYSTEM_PASSWORD=Chang4On
+
+export ORA_TPCC_USER=${ORA_TPCC_USER:-tpcc}
+export ORA_TPCC_PASS=${ORA_TPCC_PASS:-tpcc}
+export ORACLE_INSTANCE=${EORACL_INSTANCE:-oralab}
+export ORA_TABLESPACE=${ORA_TABLESPACE:-USERS}
+export ORA_STORAGE=${ORA_STORAGE:-DEFAULT}
+export ORA_DURABILITY=${ORA_DURABILITY:-nologging}
+
+
 mkdir -p results/
 
 TCL_SCRIPT=run.tcl

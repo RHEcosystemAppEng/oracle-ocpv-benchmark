@@ -32,10 +32,10 @@ case "$PROFILE" in
     ;;
 
   scale-run)
-    export ORA_COUNT_WARE=1000
-    export VU_LIST="10 20 40 80 100"
-    export ORA_RAMPUP=5
-    export ORA_DURATION=20
+    export ORA_COUNT_WARE=500
+    export VU_LIST="10 20"
+    export ORA_RAMPUP=2
+    export ORA_DURATION=15
     export ORA_ALLWAREHOUSE=true
     export HDB_PROFILE_ID=4
     ;;
