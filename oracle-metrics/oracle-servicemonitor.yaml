@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: oracle-exporter-monitor
+  namespace: oracle-monitoring
+  labels:
+    release: prometheus  # IMPORTANT: Prometheus uses this label to pick it up
+spec:
+  selector:
+    matchLabels:
+      app: oracle-observability-exporter
+  namespaceSelector:
+    matchNames:
+      - oracle-monitoring
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
