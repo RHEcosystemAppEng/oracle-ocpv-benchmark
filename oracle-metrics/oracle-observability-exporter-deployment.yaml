@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oracle-observability-exporter
+  labels:
+    app: oracle-observability-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oracle-observability-exporter
+  template:
+    metadata:
+      labels:
+        app: oracle-observability-exporter
+    spec:
+      volumes:
+        - name: log-volume
+          emptyDir: {}  # This will create an empty directory for logs. You can change this to a PersistentVolume if needed.
+      containers:
+        - name: exporter
+          image: container-registry.oracle.com/database/observability-exporter:1.5.5
+          ports:
+            - containerPort: 9161
+          volumeMounts:
+            - name: log-volume
+              mountPath: /log
+          envFrom:
+            - secretRef:
+                name: oracle-observability-secrets
+          env:
+            - name: ORACLE_EXPORTER_LOG_PATH
+              value: "/log/alert.log"  # Point to the correct log path
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oracle-observability-exporter
+spec:
+  selector:
+    app: oracle-observability-exporter
+  ports:
+    - protocol: TCP
+      port: 9161
+      targetPort: 9161
