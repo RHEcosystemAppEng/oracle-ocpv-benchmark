@@ -38,7 +38,8 @@ diset tpcc rampup           [expr {[info exists ::env(ORA_RAMPUP)] ? $::env(ORA_
 diset tpcc duration         [expr {[info exists ::env(ORA_DURATION)] ? $::env(ORA_DURATION) : 20}]
 diset tpcc allwarehouse     [expr {[info exists ::env(ORA_ALLWAREHOUSE)] ? $::env(ORA_ALLWAREHOUSE) : "true"}]
 diset tpcc ora_timeprofile  true
-diset tpcc ora_raiseerror   true
+diset tpcc checkpoint       false
+
 diset tpcc tpcc_user        [expr {[info exists ::env(ORA_TPCC_USER)] ? $::env(ORA_TPCC_USER) : "tpcc"}]
 diset tpcc tpcc_pass        [expr {[info exists ::env(ORA_TPCC_PASS)] ? $::env(ORA_TPCC_PASS) : "tpcc"}]
 diset tpcc userexists       true
