@@ -1,14 +1,10 @@
 #!/bin/bash
 set -euo pipefail
 
-# Load environment variables from .env if it exists
-if [[ -f ".env" ]]; then
-  set -a
-  source .env
-  set +a
-fi
-
 source ./profile.sh
+
+# Load environment variables only once from .env if it exists
+source ./load-env.sh
 
 mkdir -p results
 
@@ -18,7 +14,11 @@ echo "Before starting the benchmark...deleting the oracle user tpcc."
 
 start_time=$(date +%s)
 
-cd "./../4.12"
+echo "-----------------------------"
+echo "WAREHOUSES:      $ORA_COUNT_WARE"
+echo "-----------------------------"
+
+cd "./../$HAMMERDB_VERSION"
 ./hammerdbcli auto ./../benchmark_scripts/build.tcl | tee "./../benchmark_scripts/results/hammerdb_build_${BENCHNAME}.log"
 
 end_time=$(date +%s)
