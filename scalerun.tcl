@@ -45,30 +45,41 @@ diset tpcc tpcc_user        [expr {[info exists ::env(ORA_TPCC_USER)] ? $::env(O
 diset tpcc tpcc_pass        [expr {[info exists ::env(ORA_TPCC_PASS)] ? $::env(ORA_TPCC_PASS) : "tpcc"}]
 diset tpcc userexists       true
 
-# Virtual User loop
+# Virtual User list
 if {[info exists ::env(VU_LIST)]} {
     set vu_list [split $::env(VU_LIST)]
 } else {
     set vu_list {10 20 40 80 100}
 }
 
+# Optional system metrics
+# metstart
+puts "\nTEST STARTED"
+
 foreach vu $vu_list {
-    puts "\nRunning with $vu virtual users..."
+    puts "\n️Running with $vu virtual users..."
 
     diset tpcc num_vu $vu
     loadscript
 
     vuset vu $vu
+    vuset logtotemp 1
     vuset unique 1
     vuset timestamps 1
     vuset showoutput 0
     vuset delay 20
     vuset repeat 1
 
+    vucreate
+    tcstart
+    tcstatus
     vurun
+    tcstop
+    vudestroy
     wait_to_complete
-
 }
 
-puts "\nScale-up test complete."
-exit
+# metstop
+
+puts "Scale-up test complete."
+
