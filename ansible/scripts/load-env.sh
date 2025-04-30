@@ -6,15 +6,16 @@ if [ -z "${_ENV_LOADED:-}" ]; then
     source .env
     set +a
     export _ENV_LOADED=1
+    # Print env if DEBUG is true
+    if [ "$DEBUG" = "true" ]; then
+      echo "========== ENVIRONMENT VARIABLES =========="
+      env | sort
+      echo "==========================================="
+    fi
   else
     echo ".env file not found in current directory: $PWD"
     exit 1
   fi
 fi
 
-# Print env if DEBUG is true
-if [ "$DEBUG" = "true" ]; then
-  echo "========== ENVIRONMENT VARIABLES =========="
-  env | sort
-  echo "==========================================="
-fi
+
