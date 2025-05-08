@@ -22,6 +22,3 @@ Please find the instructions to set up the [Oracle Observability exporter](./set
 
 Please find the instructions to set up the [Grafana instance and dashboards](./setup-grafana.md).
 
-## Generating the AWR report
-
-Please find the instructions to generate the [AWR report](./generating-awr-report) for oracle RAC. This document provides detailed explanation required to understand oracle rac snapshots.
