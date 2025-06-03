@@ -1,8 +1,7 @@
-# Automated Oracle Benchmarking & Observability on OpenShift Virtualization
+#  Oracle Benchmarking & Observability on OpenShift Virtualization
 
-This repo automates the setup and execution of **HammerDB TPC-C benchmarks** against Oracle databases. We leverage **Ansible** for provisioning and configuration, integrating Oracle's Observability Exporter with **Grafana** for an **OpenShift-native observability stack**. The primary objective is to automate Oracle performance testing on **RHEL VMs provisioned via OpenShift Virtualization**.
-
----
+This repo automates the setup and execution of **HammerDB TPC-C benchmarks** against Oracle databases.We leverage Ansible for provisioning and configuring the environment, enabling automated benchmark execution. 
+The solution also provides instructions on how to integrate Oracle's Observability Exporter with Grafana to create an OpenShift-native observability stack. Our primary objective is to automate Oracle performance testing on RHEL VMs provisioned via OpenShift Virtualization
 
 ## Project Functionality
 
@@ -10,11 +9,11 @@ This project provides the necessary tooling to automate **Oracle TPC-C benchmark
 
 * Installation of Oracle client tools.
 * Deployment of HammerDB itself.
-* Configuration via custom TCL scripts with TNS Ora file for HammerDB.
+* Configuration via custom TCL scripts and the TNS Ora file for HammerDB.
 
 Once the environment is deployed, you can initiate **standardized database load tests** directly on the provisioned VM.
 
-Beyond benchmarking, this solution also enables:
+Beyond benchmarking, this solution also **provides guidance on:**
 
 * **Prometheus-compatible metric collection** from the Oracle DB using the Oracle Observability Exporter.
 * **Visualization of these metrics** through pre-configured Grafana dashboards on OpenShift.
