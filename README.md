@@ -1,6 +1,30 @@
-# HammerDB Oracle Benchmark Setup
+#  Oracle Benchmarking & Observability on OpenShift Virtualization
 
-This repo automates Oracle TPC-C benchmark runs using HammerDB. It includes a set of scripts to handle setup, schema builds, and workload execution. It supports Oracle connections using a `tnsnames.ora` file and TCL scripts.
+This repo automates the setup and execution of **HammerDB TPC-C benchmarks** against Oracle databases.We leverage Ansible for provisioning and configuring the environment, enabling automated benchmark execution. 
+The solution also provides instructions on how to integrate Oracle's Observability Exporter with Grafana to create an OpenShift-native observability stack. Our primary objective is to automate Oracle performance testing on RHEL VMs provisioned via OpenShift Virtualization
+
+## Project Functionality
+
+This project provides the necessary tooling to automate **Oracle TPC-C benchmark runs** using [HammerDB](https://hammerdb.com/). Included **Ansible playbooks** handle:
+
+* Installation of Oracle client tools.
+* Deployment of HammerDB itself.
+* Configuration via custom TCL scripts and the TNS Ora file for HammerDB.
+
+Once the environment is deployed, you can initiate **standardized database load tests** directly on the provisioned VM.
+
+Beyond benchmarking, this solution also **provides guidance on:**
+
+* **Prometheus-compatible metric collection** from the Oracle DB using the Oracle Observability Exporter.
+* **Visualization of these metrics** through pre-configured Grafana dashboards on OpenShift.
+
+---
+
+## Oracle RAC Performance Test Architecture
+
+![rac-performance_test-arc.png](rac-performance_test-arc.png)
+
+---
 
 ## Project Structure
 
@@ -23,22 +47,108 @@ Github Project Structure:
 
 ## Requirements
 
-* Ansible version <2.10. Tested from macbook pro M3.
+* A RHEL managed VM (on OpenShift Virtualization).
+* Python + Ansible <2.10 installed on your control machine (e.g., your dev workstation).
+* Access to an OpenShift cluster (for the monitoring stack).
+* OpenShift CLI (`oc`) configured.
 
-## Configuration
+**Ansible Version Check:**
 
-### 1. Initial Setup using Ansible
-Please check the readme to set up in [ansible](ansible) for detailed instructions. You need ansible<2.10 version to be compatible with RHEL 8 VM.
+Ensure Ansible is `<2.10`:
+```bash
+pip install "ansible<2.10"
+ansible-playbook --version
+```
 
-Update the target vm details in ansible inventory.ini. Below playbook installs oracle client, hammer DB and copies all the scripts to target VM.
+### 1. Ansible Inventory and Parameters Configuration
+
+Before running any playbooks, configure your environment variables and Ansible inventory.
+
+
+1. **Update `inventory.ini`**:
+   Define your target HammerDB client VM details.
+
+```
+      hammerdb_oracle_client_vms ansible_host=<vm-host> ansible_user=<vm_user> ansible_ssh_private_key_file=<> 
+```
+
+2. **TNS Configuration**
+   Configure Oracle client connectivity via `tnsnames.ora`. These variables define the connection parameters for your Oracle environment. 
+   Note: `tnsnames.ora` is set as read-only post-configuration. 
+```
+       oracle_host=<your_oracle_scan_or_host>  # e.g., oracle RAC host name
+       oracle_port=1521                        # Oracle listener port
+       oracle_sid=pdb1                         # e.g., pdb1
+       oracle_tns_name=ORALAB
+       tns_admin_path=/opt/HammerDB/hammerdb-oracle-tns
+```
+ 
+3. **Oracle Client Installation**
+   Specify Oracle Instant Client RPMs. Default is 19.26, but configurable.
+
+```
+    oracle_major_version=19.26
+    oracle_minor_version=0.0.0-1.el8
+    base_url=https://yum.oracle.com/repo/OracleLinux/OL8/oracle/instantclient/x86_64/getPackage
+    oracle_home_path=/usr/lib/oracle/19.26/client64
+``` 
+   
+4. **HammerDB Setup**
+   Define HammerDB version and installation paths. Current default is 4.12.
+```
+      hammerdb_version=4.12
+      hammerdb_base_path=/opt/HammerDB
+      oracle_client_home=/usr/lib/oracle/19.26/client64
+```
+5. **Update Environment Variables for HamerDB Script**
+
+You have .env file to set up all the environment variables required for the benchmark.
+Please update below environemnt variables:
+
+```bash
+#password for oracle system user.
+export ORACLE_SYSTEM_PASSWORD=yourpassword
+#and if required any other variables  
+
+```
+
+
+### 2. Test & Run Ansible Playbooks
+
+Navigate to the `ansible` directory on your control node.
+
+
 
 ```shell
-#Run the playbook to install all required dependencies.
+
 cd ansible
+#Test the connection:
+
+ansible -i inventory.ini -m ping hammerdb_oracle_client_vms
+
+
+#Run the playbook to install all required dependencies.
 ansible-playbook -i inventory.ini main_setup_oracle_hammerdb_benchmark.yml
 ```
 
-Now your target VM should have set up the project structure as below. All the dependencies will be inside `/opt/HammerDB` path. `benchmark_scripts` folder will have all the custom scripts to run the benchmark.
+Individual playbooks can also be executed for granular updates:
+
+
+```shell
+# Install Oracle client
+ansible-playbook -i inventory.ini playbooks/oracle-client/install_oracle_client.yml
+
+# Configure tnsnames.ora
+ansible-playbook -i inventory.ini playbooks/configure-tnsnames/configure_tnsnames.yml
+
+# Install HammerDB and copy scripts
+ansible-playbook -i inventory.ini playbooks/setup-hammerdb/install_setup_hammer_db.yml
+```
+
+
+## Running the Benchmark
+
+Post-Ansible execution, your target VM should have the following directory structure (default base path: /opt/HammerDB): All the dependencies will be inside location as you configured the path with `benchmark_scripts` folder will have all the custom scripts to run the benchmark.
 `hammerdb-oracle-tns` will have the tnsnames.ora file.
 
 ```shell
@@ -61,19 +171,6 @@ Now your target VM should have set up the project structure as below. All the de
 13 directories
 ```
 
-### 2. Environment Variables
-
-You have .env file to set up all the environment variables required for the benchmark.
-Please update below environemnt variables:
-
-```bash
-#password for oracle system user.
-export ORACLE_SYSTEM_PASSWORD=yourpassword
-export TNS_ADMIN=/opt/HammerDB/hammerdb-oracle-tns/
-export ORACLE_INSTANCE=${ORACLE_INSTANCE:-ORALAB}
-```
-
-## Running the Benchmark
 Go to folder `/opt/HammerDB/benchmark_scripts` on the client VM.
 ### Build the schema
 ```bash

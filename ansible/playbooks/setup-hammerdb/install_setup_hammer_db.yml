@@ -1,14 +1,8 @@
 - name: Install and Setup HammerDB for Oracle Benchmark
-  hosts: hammerdb-oracle-client-vms
+  hosts: hammerdb_oracle_client_vms
   become: yes
   vars:
-    hammerdb_version: "4.12"
-    hammerdb_base_path: "/opt/HammerDB"
     hammerdb_path: "{{ hammerdb_base_path }}/{{ hammerdb_version }}"
-    tns_admin_path: "/opt/HammerDB/hammerdb-oracle-tns"  # tnsnames.ora file path
-    oracle_client_home: "/usr/lib/oracle/19.26/client64"
-    oracle_tns_name: "ORALAB"  # TNS entry name for Oracle connection
-
   tasks:
     - name: Install tcl using raw command
       raw: dnf install -y tcl

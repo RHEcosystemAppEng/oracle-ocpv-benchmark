@@ -75,12 +75,12 @@ ssh rhel@localhost -p 2222
 
 Now add below VM to ansible inventory.ini. `ansible_ssh_private_key_file` is the private key to do the ssh in to VM. This path needs to be corrected as per your scenario.
 ```shell
-hammerdb-oracle-client-vms ansible_host=127.0.0.1 ansible_user=rhel ansible_ssh_private_key_file=~/.ssh/id_ed25519 ansible_port=2222 ansible_python_interpreter=/usr/libexec/platform-python
+hammerdb_oracle_client_vms ansible_host=127.0.0.1 ansible_user=rhel ansible_ssh_private_key_file=~/.ssh/id_ed25519 ansible_port=2222 ansible_python_interpreter=/usr/libexec/platform-python
 ```
 
 Check if the ansible able to reach the VM by doing below `ping` test
 ```shell
-ansible -i inventory.ini -m ping hammerdb-oracle-client-vms
+ansible -i inventory.ini -m ping hammerdb_oracle_client_vms
 ```
 
 If above statement works fine then your ansible setup is successful. And you are good to execute the playbooks and desired vm and should be able to set up with Hammerdb oracle benchmark.

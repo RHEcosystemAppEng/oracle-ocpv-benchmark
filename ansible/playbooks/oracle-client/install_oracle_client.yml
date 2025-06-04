@@ -1,13 +1,10 @@
 - name: Install Oracle Instant Client
-  hosts: hammerdb-oracle-client-vms
+  hosts: hammerdb_oracle_client_vms
   become: yes
   vars:
-    oracle_major_version: "19.26"
-    oracle_minor_version: "0.0.0-1.el8"
     tmp_dir: "/tmp"
     basic_rpm: "oracle-instantclient{{ oracle_major_version }}-basic-{{ oracle_major_version }}.{{ oracle_minor_version }}.x86_64.rpm"
     sqlplus_rpm: "oracle-instantclient{{ oracle_major_version }}-sqlplus-{{ oracle_major_version }}.{{ oracle_minor_version }}.x86_64.rpm"
-    base_url: "https://yum.oracle.com/repo/OracleLinux/OL8/oracle/instantclient/x86_64/getPackage"
     oracle_home_path: "/usr/lib/oracle/{{ oracle_major_version }}/client64"
 
   tasks:
