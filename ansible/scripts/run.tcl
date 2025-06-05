@@ -43,18 +43,21 @@ diset tpcc tpcc_user        [expr {[info exists ::env(ORA_TPCC_USER)] ? $::env(O
 diset tpcc tpcc_pass        [expr {[info exists ::env(ORA_TPCC_PASS)] ? $::env(ORA_TPCC_PASS) : "tpcc"}]
 diset tpcc userexists       true
 
-puts "Configuration:"
-print dict
+# puts "Configuration:"
+# print dict
 
+# Virtual User settings
 vuset vu $::env(ORA_NUM_VU)
+vuset logtotemp 1
 vuset unique 1
 vuset timestamps 1
 vuset showoutput 0
 vuset delay 20
-vuset repeat 1
 
 puts "Launching Virtual Users..."
+vucreate
+tcstart
 vurun
-
+tcstop
+vudestroy
 wait_to_complete
-vwait forever

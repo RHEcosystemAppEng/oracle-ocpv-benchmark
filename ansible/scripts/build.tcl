@@ -37,8 +37,8 @@ if {[expr $count_ware >= 200]} {
 loadscript
 
 # Print the current configuration
-puts "\nBuild configuration:"
-print dict
+# puts "\nBuild configuration:"
+# print dict
 
 # Start schema build
 puts "Launching schema build..."
