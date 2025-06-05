@@ -76,6 +76,9 @@ foreach vu $vu_list {
     tcstop
     vudestroy
     wait_to_complete
+
+    # Wait 10 seconds before next iteration
+     after 10000
 }
 
 # metstop
