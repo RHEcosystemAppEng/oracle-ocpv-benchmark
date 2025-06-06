@@ -13,3 +13,5 @@
         src: "../../templates/tnsnames.ora.j2"
         dest: "{{ tns_admin_path }}/tnsnames.ora"
         mode: '0644'
+      vars:
+        tns_entries: "{{ oracle_tns_entries }}"
