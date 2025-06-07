@@ -73,14 +73,21 @@ you can also SSH from your local machine as below:
 ssh rhel@localhost -p 2222
 ```
 
-Now add below VM to ansible inventory.ini. `ansible_ssh_private_key_file` is the private key to do the ssh in to VM. This path needs to be corrected as per your scenario.
-```shell
-hammerdb_oracle_client_vms ansible_host=127.0.0.1 ansible_user=rhel ansible_ssh_private_key_file=~/.ssh/id_ed25519 ansible_port=2222 ansible_python_interpreter=/usr/libexec/platform-python
+Now add below VM to ansible inventory.yaml. `ansible_ssh_private_key_file` is the private key to do the ssh in to VM. This path and necessary fields needs to be corrected as per your scenario.
+```yaml
+hammerdb_oracle_client_vms:
+  hosts:
+    oralab_vm1:
+      ansible_host: 127.0.0.1
+      ansible_user: rhel
+      ansible_ssh_private_key_file: ~/rac-ocpv.pem
+      ansible_port: 2222
+      ansible_python_interpreter: /usr/libexec/platform-python
 ```
 
 Check if the ansible able to reach the VM by doing below `ping` test
 ```shell
-ansible -i inventory.ini -m ping hammerdb_oracle_client_vms
+ansible -i inventory.yaml -m ping hammerdb_oracle_client_vms
 ```
 
 If above statement works fine then your ansible setup is successful. And you are good to execute the playbooks and desired vm and should be able to set up with Hammerdb oracle benchmark.
@@ -90,19 +97,19 @@ If above statement works fine then your ansible setup is successful. And you are
 If you would like to install everything. This is ideally recommended for the new vm or if you haven't setup hammerdb or oracle client.
 You can run below commands from ansible directory
 ```shell
-ansible-playbook -i inventory.ini main_setup_oracle_hammerdb_benchmark.yml
+ansible-playbook -i inventory.yaml main_setup_oracle_hammerdb_benchmark.yml
 ```
 
 You can also run individual playbooks to set up any of these as desired
 ```shell
 # Run below command to run oracle client
-ansible-playbook -i inventory.ini playbooks/oracle-client/install_oracle_client.yml
+ansible-playbook -i inventory.yaml playbooks/oracle-client/install_oracle_client.yml
 
 # Run below command to configure tnsnames.ora file so that hammerdb can refer it.
-ansible-playbook -i inventory.ini playbooks/configure-tnsnames/configure_tnsnames.yml
+ansible-playbook -i inventory.yaml playbooks/configure-tnsnames/configure_tnsnames.yml
 
 # Run below command to set up and configure the hammerdb for oracle benchmark.
-ansible-playbook -i inventory.ini playbooks/setup-hammerdb/install_setup_hammer_db.yml
+ansible-playbook -i inventory.yaml playbooks/setup-hammerdb/install_setup_hammer_db.yml
 ```
 
 
@@ -133,8 +140,6 @@ sqlplus sys/<PASSWORD>@ORALAB as sysdba
 CREATE USER tpcc IDENTIFIED BY <tpcc password>;
 GRANT CONNECT, RESOURCE, CREATE SESSION TO tpcc;
 GRANT DROP, CREATE ANY TABLE TO tpcc;
-
-
 
 # drops the user tpcc
 DROP USER tpcc CASCADE;
