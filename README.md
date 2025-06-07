@@ -65,7 +65,7 @@ ansible-playbook --version
 Before running any playbooks, configure your environment variables and Ansible inventory.
 
 
-1. **Update `inventory.ini`**:
+1. **Update `inventory.yaml`**:
    Define your target HammerDB client VM details.
 
 ```
@@ -124,11 +124,11 @@ Navigate to the `ansible` directory on your control node.
 cd ansible
 #Test the connection:
 
-ansible -i inventory.ini -m ping hammerdb_oracle_client_vms
+ansible -i inventory.yaml -m ping hammerdb_oracle_client_vms
 
 
 #Run the playbook to install all required dependencies.
-ansible-playbook -i inventory.ini main_setup_oracle_hammerdb_benchmark.yml
+ansible-playbook -i inventory.yaml main_setup_oracle_hammerdb_benchmark.yml
 ```
 
 Individual playbooks can also be executed for granular updates:
@@ -136,13 +136,13 @@ Individual playbooks can also be executed for granular updates:
 
 ```shell
 # Install Oracle client
-ansible-playbook -i inventory.ini playbooks/oracle-client/install_oracle_client.yml
+ansible-playbook -i inventory.yaml playbooks/oracle-client/install_oracle_client.yml
 
 # Configure tnsnames.ora
-ansible-playbook -i inventory.ini playbooks/configure-tnsnames/configure_tnsnames.yml
+ansible-playbook -i inventory.yaml playbooks/configure-tnsnames/configure_tnsnames.yml
 
 # Install HammerDB and copy scripts
-ansible-playbook -i inventory.ini playbooks/setup-hammerdb/install_setup_hammer_db.yml
+ansible-playbook -i inventory.yaml playbooks/setup-hammerdb/install_setup_hammer_db.yml
 ```
 
 
