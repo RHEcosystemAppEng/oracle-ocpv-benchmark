@@ -11,6 +11,7 @@ case "$PROFILE" in
     export ORA_RAMPUP=2
     export ORA_DURATION=5
     export ORA_ALLWAREHOUSE=false
+    export HDB_PROFILE_ID=100
     echo "Small profile: Quick validation test (7 min total)"
     ;;
 
@@ -21,6 +22,7 @@ case "$PROFILE" in
     export ORA_RAMPUP=3
     export ORA_DURATION=10
     export ORA_ALLWAREHOUSE=true
+    export HDB_PROFILE_ID=200
     echo "Medium profile: Development testing (13 min total)"
     ;;
 
@@ -31,6 +33,7 @@ case "$PROFILE" in
     export ORA_RAMPUP=5
     export ORA_DURATION=15
     export ORA_ALLWAREHOUSE=true
+    export HDB_PROFILE_ID=300
     echo "Large profile: Production-like load (20 min total)"
     ;;
 
@@ -41,6 +44,7 @@ case "$PROFILE" in
     export ORA_RAMPUP=5
     export ORA_DURATION=20
     export ORA_ALLWAREHOUSE=true
+    export HDB_PROFILE_ID=400
     echo "XLarge profile: High-intensity stress test (25 min total)"
     ;;
 
@@ -51,6 +55,7 @@ case "$PROFILE" in
     export ORA_RAMPUP=3                    # Faster rampup for multiple runs
     export ORA_DURATION=10                 # Shorter duration for multiple tests
     export ORA_ALLWAREHOUSE=true           # Essential for scaling tests
+    export HDB_PROFILE_ID=500
     echo "Scale-run profile: Multi-VU capacity planning"
     ;;
 
@@ -61,6 +66,7 @@ case "$PROFILE" in
     export ORA_RAMPUP=1
     export ORA_DURATION=3
     export ORA_ALLWAREHOUSE=true
+    export HDB_PROFILE_ID=1
     echo "Quick profile: Ultra-fast smoke test (4 min total)"
     ;;
 
@@ -71,6 +77,7 @@ case "$PROFILE" in
     export ORA_RAMPUP=5
     export ORA_DURATION=60                 # 1-hour test
     export ORA_ALLWAREHOUSE=true
+    export HDB_PROFILE_ID=600
     echo "Endurance profile: Long-running stability test (65 min total)"
     ;;
 
@@ -80,8 +87,6 @@ case "$PROFILE" in
     exit 1
     ;;
 esac
-
-export HDB_PROFILE_ID="$PROFILE"
 
 # Display configuration
 echo "Configuration for $PROFILE profile:"
