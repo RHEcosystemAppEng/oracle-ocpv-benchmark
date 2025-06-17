@@ -96,3 +96,15 @@ Import the required dashboards you want to monitor. Go to dashboards and import 
   https://grafana.com/grafana/dashboards/3333-oracledb/
 * Import the openshift virutalization dashboard from the URL
   https://raw.githubusercontent.com/leoaaraujo/articles/master/openshift-virtualization-monitoring/files/ocp-v-dashboard.json
+
+You can find some sample screenshots captured after deploying on one of our openshift cluster.
+
+Oracle Database Observability Grafana Dashboard, this is configured on oracle standalone database.
+![oracledb-grafana-dashboard-1.jpg](screenshots/oracledb-grafana-dashboard-1.jpg)
+![oracledb-grafana-dashboard-2.jpg](screenshots/oracledb-grafana-dashboard-2.jpg)
+
+
+Openshift Virtualization Observability Grafana Dashboard:
+![ocpv-grafana-dashboard-1.jpg](screenshots/ocpv-grafana-dashboard-1.jpg)
+![ocpv-grafana-dashboard-2.jpg](screenshots/ocpv-grafana-dashboard-2.jpg)
+![ocpv-grafana-dashboard-3.jpg](screenshots/ocpv-grafana-dashboard-3.jpg)
