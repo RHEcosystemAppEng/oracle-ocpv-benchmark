@@ -2,9 +2,9 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: oracle-exporter-monitor
-  namespace: oracle-monitoring
+  namespace: openshift-monitoring
   labels:
-    release: prometheus  # IMPORTANT: Prometheus uses this label to pick it up
+    app: oracle-observability-exporter
 spec:
   selector:
     matchLabels:
@@ -13,6 +13,6 @@ spec:
     matchNames:
       - oracle-monitoring
   endpoints:
-    - port: metrics
+    - port: oracle-metrics
       path: /metrics
       interval: 30s
