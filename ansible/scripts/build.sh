@@ -8,16 +8,14 @@ source ./load-env.sh
 
 mkdir -p results
 
-# dropping the tpcc schema before test run. and ignore the error.
-if [ "$DROP_TPCC_SCHEMA_FOR_EACH_BENCHMARK" = "true" ]; then
-  echo "Before starting the benchmark...deleting the oracle user tpcc."
-  ./drop_tpcc_user.sh || echo "Ignoring failure in drop_tpcc_user.sh"
-fi
 
 start_time=$(date +%s)
 
 echo "-----------------------------"
 echo "WAREHOUSES:      $ORA_COUNT_WARE"
+echo "ORA_NUM_VU:      ORA_NUM_VU"
+
+
 echo "-----------------------------"
 
 cd "./../$HAMMERDB_VERSION"
