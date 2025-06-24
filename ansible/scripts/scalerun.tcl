@@ -16,9 +16,36 @@ proc wait_to_complete {} {
     }
 }
 
+# making sure virtual user destroyed before running another run
+proc safe_vudestroy {} {
+    puts "Destroying virtual users..."
+    vudestroy
+    # Wait and verify destruction
+    set max_attempts 10
+    set attempt 0
+    while {$attempt < $max_attempts} {
+        after 2000  ; # Wait 2 seconds
+        # Check if virtual users still exist using vustatus
+        if {[catch {vustatus} vu_status] == 0} {
+            # If vustatus returns without error and shows no active VUs
+            if {![string match "*Virtual Users*" $vu_status] || [string match "*0 Virtual Users*" $vu_status]} {
+                puts "Virtual users successfully destroyed"
+                return 1
+            }
+        } else {
+            # If vustatus fails, likely no VUs exist
+            puts "Virtual users successfully destroyed"
+            return 1
+        }
+        incr attempt
+        puts "Waiting for virtual users to be destroyed... (attempt $attempt/$max_attempts)"
+    }
+    puts "WARNING: Virtual users may not have been fully destroyed"
+    return 0
+}
+
 # Database type
 dbset db ora
-
 
 set profile_id [expr {[info exists ::env(HDB_PROFILE_ID)] ? $::env(HDB_PROFILE_ID) : 0}]
 jobs profileid $profile_id
@@ -31,7 +58,6 @@ loadscript
 diset connection system_user system
 diset connection system_password $env(ORACLE_SYSTEM_PASSWORD)
 diset connection instance [expr {[info exists ::env(ORACLE_INSTANCE)] ? $::env(ORACLE_INSTANCE) : "oralab"}]
-
 
 diset tpcc ora_driver       timed
 diset tpcc count_ware       [expr {[info exists ::env(ORA_COUNT_WARE)] ? $::env(ORA_COUNT_WARE) : 1000}]
@@ -51,16 +77,24 @@ if {[info exists ::env(VU_LIST)]} {
     set vu_list {10 20 40 80 100}
 }
 
+
+
 # Optional system metrics
 # metstart
+
 puts "\nTEST STARTED"
 
 foreach vu $vu_list {
     puts "\n️Running with $vu virtual users..."
 
+    # Reset completion flag
+    set complete 0
+
+    # Configure for this VU count
     diset tpcc num_vu $vu
     loadscript
 
+    # Virtual user settings
     vuset vu $vu
     vuset logtotemp 1
     vuset unique 1
@@ -73,15 +107,20 @@ foreach vu $vu_list {
     tcstart
     tcstatus
     vurun
-    tcstop
-    vudestroy
+
+    # Wait for completion
+    puts "Waiting for test completion..."
     wait_to_complete
 
-    # Wait 10 seconds before next iteration
-     after 10000
+    # Stop test
+    tcstop
+
+    # Safely destroy virtual users
+    safe_vudestroy
+
+    puts "Waiting before next iteration..."
+    after 3000
 }
 
 # metstop
-
 puts "Scale-up test complete."
-
