@@ -1,6 +1,6 @@
 all:
   children:
-    hammerdb_oracle_client_vms:
+    oracle_benchmark_client_vms:
       hosts:
         oralab_vm1:
           ansible_host: <control machine ip or host>
@@ -8,41 +8,7 @@ all:
           ansible_ssh_private_key_file: < path of ansible_ssh_private_key_file like .pem file>
           ansible_python_interpreter: /usr/libexec/platform-python
       vars:
-        # TNS Configuration (multiple entries)
-        default_tns_entry: "ORALAB_STANDALONE"  # Default TNS entry to use
-        oracle_tns_entries:
-          - tns_name: "ORALAB"
-            host: <oralab-oracle-rac host name>
-            port: "1521"
-            sid: "pdb1"
-          - tns_name: "ORALAB_STANDALONE"
-            host: <oralab-oracle-standalone host name>
-            port: "1521"
-            sid: "pdb1"
-
-        # OCPV Benchmark Base Configuration
-        benchmark_base_path: /opt/ocpv-benchmark
-        tns_admin_path: "{{ benchmark_base_path }}/tns"
-
-        # System User Configuration
-        system_user: cloud-user
-        system_group: cloud-user
-        user_home_path: "/home/{{ system_user }}"
-
-        # Oracle Client Installation
-        oracle_major_version: 19.26
-        oracle_minor_version: 0.0.0-1.el8
-        base_url: https://yum.oracle.com/repo/OracleLinux/OL8/oracle/instantclient/x86_64/getPackage
-        oracle_home_path: /usr/lib/oracle/19.26/client64
-
-        # HammerDB Setup
-        hammerdb_version: 4.12
-        hammerdb_base_path: "{{ benchmark_base_path }}/hammerdb"
-        hammerdb_install_path: "{{ hammerdb_base_path }}/{{ hammerdb_version }}"
-
-        # SwingBench Setup (Unix/Linux/Windows JDK 11, Updated November 4th 2023)
-        swingbench_base_path: "{{ benchmark_base_path }}/swingbench"
-        swingbench_version: 20231104_jdk11
-
-        # Scripts Configuration
-        scripts_base_path: "{{ benchmark_base_path }}/scripts"
+        # Benchmark Tool Selection (enum-like variable)
+        # Valid values: "hammerdb", "swingbench", "all"
+        # Default: "all" (installs both tools)
+        benchmark_tool: "all"

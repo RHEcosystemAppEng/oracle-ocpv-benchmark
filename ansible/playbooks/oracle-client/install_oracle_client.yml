@@ -1,5 +1,5 @@
 - name: Install Oracle Instant Client
-  hosts: hammerdb_oracle_client_vms
+  hosts: oracle_benchmark_client_vms
   become: yes
   vars:
     tmp_dir: "/tmp"
@@ -8,6 +8,9 @@
     oracle_home_path: "/usr/lib/oracle/{{ oracle_major_version }}/client64"
 
   tasks:
+    - name: Load common variables
+      include_vars: ../vars/common.yml
+      
     - name: Check if Oracle Instant Client is already installed
       stat:
         path: "{{ oracle_home_path }}"
@@ -69,3 +72,74 @@
           ❌ Oracle Instant Client installation directory not found at {{ oracle_home_path }}.
           Something went wrong during the installation.
           {% endif %}
+
+    - name: Install Oracle Instant Client Basic
+      dnf:
+        name: "{{ base_url }}/oracle-instantclient-basic-{{ oracle_major_version }}-{{ oracle_minor_version }}.x86_64.rpm"
+        state: present
+        disable_gpg_check: yes
+
+    - name: Install Oracle Instant Client SQL*Plus
+      dnf:
+        name: "{{ base_url }}/oracle-instantclient-sqlplus-{{ oracle_major_version }}-{{ oracle_minor_version }}.x86_64.rpm"
+        state: present
+        disable_gpg_check: yes
+
+    - name: Install Oracle Instant Client Tools
+      dnf:
+        name: "{{ base_url }}/oracle-instantclient-tools-{{ oracle_major_version }}-{{ oracle_minor_version }}.x86_64.rpm"
+        state: present
+        disable_gpg_check: yes
+
+    - name: Install Oracle Instant Client Development
+      dnf:
+        name: "{{ base_url }}/oracle-instantclient-devel-{{ oracle_major_version }}-{{ oracle_minor_version }}.x86_64.rpm"
+        state: present
+        disable_gpg_check: yes
+
+    - name: Install Oracle Instant Client JDBC
+      dnf:
+        name: "{{ base_url }}/oracle-instantclient-jdbc-{{ oracle_major_version }}-{{ oracle_minor_version }}.x86_64.rpm"
+        state: present
+        disable_gpg_check: yes
+
+    - name: Install Oracle Instant Client ODBC
+      dnf:
+        name: "{{ base_url }}/oracle-instantclient-odbc-{{ oracle_major_version }}-{{ oracle_minor_version }}.x86_64.rpm"
+        state: present
+        disable_gpg_check: yes
+
+    - name: Create benchmark directory
+      file:
+        path: "{{ benchmark_base_path }}"
+        state: directory
+        mode: '0755'
+        owner: "{{ system_user }}"
+        group: "{{ system_group }}"
+
+    - name: Create TNS directory
+      file:
+        path: "{{ tns_admin_path }}"
+        state: directory
+        mode: '0755'
+        owner: "{{ system_user }}"
+        group: "{{ system_group }}"
+
+    - name: Set environment variables for Oracle client
+      lineinfile:
+        path: "{{ user_home_path }}/.bash_profile"
+        line: "{{ item }}"
+        create: yes
+        owner: "{{ system_user }}"
+        group: "{{ system_group }}"
+      loop:
+        - "export ORACLE_HOME={{ oracle_home_path }}"
+        - "export PATH=$PATH:$ORACLE_HOME/bin"
+        - "export LD_LIBRARY_PATH=$ORACLE_HOME/lib:$LD_LIBRARY_PATH"
+        - "export TNS_ADMIN={{ tns_admin_path }}"
+
+    - name: Source the updated .bash_profile
+      shell: "source {{ user_home_path }}/.bash_profile"
+      args:
+        executable: /bin/bash
+      become_user: "{{ system_user }}"

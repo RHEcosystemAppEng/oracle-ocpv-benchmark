@@ -1,9 +1,15 @@
 - name: Install and Setup HammerDB for Oracle Benchmark
-  hosts: hammerdb_oracle_client_vms
+  hosts: oracle_benchmark_client_vms
   become: yes
   vars:
     hammerdb_path: "{{ hammerdb_install_path }}"
   tasks:
+    - name: Load common variables
+      include_vars: ../../vars/common.yml
+      
+    - name: Load HammerDB-specific variables
+      include_vars: ../../vars/hammerdb.yml
+      
     - name: Install tcl using raw command
       raw: dnf install -y tcl
       when: ansible_os_family == "RedHat"

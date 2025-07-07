@@ -1,0 +1,22 @@
+---
+# Conditional OCPV Benchmark Setup
+# This playbook installs benchmark tools based on the benchmark_tool variable
+# Valid values: "hammerdb", "swingbench", "all"
+# Default: "all" (installs both tools)
+#
+# Usage:
+#   ansible-playbook -i inventory.yaml main_setup_conditional_benchmark.yml
+#   ansible-playbook -i inventory.yaml main_setup_conditional_benchmark.yml -e benchmark_tool=hammerdb
+#   ansible-playbook -i inventory.yaml main_setup_conditional_benchmark.yml -e benchmark_tool=swingbench
+
+# Always install Oracle client and TNS configuration
+- import_playbook: playbooks/oracle-client/install_oracle_client.yml
+- import_playbook: playbooks/configure-tnsnames/configure_tnsnames.yml
+
+# Conditional HammerDB installation
+- import_playbook: playbooks/setup-hammerdb/install_setup_hammer_db.yml
+  when: benchmark_tool | default('all') in ['hammerdb', 'all']
+
+# Conditional SwingBench installation  
+- import_playbook: playbooks/setup-swingbench/install_setup_swingbench.yml
+  when: benchmark_tool | default('all') in ['swingbench', 'all'] 

@@ -1,0 +1,6 @@
+# SwingBench-Specific Variables  
+# This file contains configuration specific to SwingBench
+
+# SwingBench Installation Configuration (Unix/Linux/Windows JDK 11, Updated November 4th 2023)
+swingbench_base_path: "{{ benchmark_base_path }}/swingbench"
+swingbench_version: 20231104_jdk11 

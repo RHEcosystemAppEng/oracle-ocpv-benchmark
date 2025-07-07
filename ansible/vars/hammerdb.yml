@@ -1,0 +1,7 @@
+# HammerDB-Specific Variables
+# This file contains configuration specific to HammerDB
+
+# HammerDB Installation Configuration
+hammerdb_version: 4.12
+hammerdb_base_path: "{{ benchmark_base_path }}/hammerdb"
+hammerdb_install_path: "{{ hammerdb_base_path }}/{{ hammerdb_version }}" 

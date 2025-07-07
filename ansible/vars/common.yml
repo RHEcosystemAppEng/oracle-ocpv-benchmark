@@ -1,0 +1,32 @@
+# Common Variables for Oracle Benchmark Tools
+# This file contains shared configuration used by both HammerDB and SwingBench
+
+# TNS Configuration (multiple entries)
+default_tns_entry: "ORALAB_STANDALONE"  # Default TNS entry to use
+oracle_tns_entries:
+  - tns_name: "ORALAB"
+    host: <oralab-oracle-rac host name>
+    port: "1521"
+    sid: "pdb1"
+  - tns_name: "ORALAB_STANDALONE"
+    host: <oralab-oracle-standalone host name>
+    port: "1521"
+    sid: "pdb1"
+
+# OCPV Benchmark Base Configuration
+benchmark_base_path: /opt/ocpv-benchmark
+tns_admin_path: "{{ benchmark_base_path }}/tns"
+
+# System User Configuration
+system_user: cloud-user
+system_group: cloud-user
+user_home_path: "/home/{{ system_user }}"
+
+# Oracle Client Installation
+oracle_major_version: 19.26
+oracle_minor_version: 0.0.0-1.el8
+base_url: https://yum.oracle.com/repo/OracleLinux/OL8/oracle/instantclient/x86_64/getPackage
+oracle_home_path: /usr/lib/oracle/19.26/client64
+
+# Scripts Configuration
+scripts_base_path: "{{ benchmark_base_path }}/scripts" 
