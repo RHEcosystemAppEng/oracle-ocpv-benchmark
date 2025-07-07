@@ -1,0 +1,152 @@
+- name: Install and Setup SwingBench for Oracle Benchmark
+  hosts: hammerdb_oracle_client_vms
+  become: yes
+  vars:
+    swingbench_path: "{{ swingbench_base_path }}/{{ swingbench_version }}"
+    swingbench_url: "https://www.dominicgiles.com/site_downloads/swingbench04112023_jdk11.zip"
+    required_java_version: "11"
+    
+  tasks:
+    - name: Check Java version
+      shell: java -version 2>&1 | head -n 1 | awk -F '"' '{print $2}' | awk -F '.' '{print $1}'
+      register: java_version_check
+      changed_when: false
+      failed_when: false
+
+    - name: Install OpenJDK 11 if Java not available or wrong version
+      dnf:
+        name: java-11-openjdk-devel
+        state: present
+      when: java_version_check.stdout != required_java_version or java_version_check.rc != 0
+
+    - name: Verify Java installation after installing
+      shell: java -version 2>&1 | head -n 1 | awk -F '"' '{print $2}' | awk -F '.' '{print $1}'
+      register: java_version_after
+      changed_when: false
+
+    - name: Fail if Java version is still incorrect
+      fail:
+        msg: "Java {{ required_java_version }} is required, but found Java {{ java_version_after.stdout }}"
+      when: java_version_after.stdout != required_java_version
+
+    - name: Install unzip utility
+      dnf:
+        name: unzip
+        state: present
+
+    - name: Check if SwingBench is already installed
+      stat:
+        path: "{{ swingbench_path }}/bin"
+      register: swingbench_bin_stat
+
+    - name: Create OCPV benchmark base directory
+      file:
+        path: "{{ benchmark_base_path }}"
+        state: directory
+        mode: '0755'
+        owner: "{{ system_user }}"
+        group: "{{ system_group }}"
+
+    - name: Create SwingBench base directory
+      file:
+        path: "{{ swingbench_base_path }}"
+        state: directory
+        mode: '0755'
+        owner: "{{ system_user }}"
+        group: "{{ system_group }}"
+
+    - name: Download SwingBench if not already downloaded
+      get_url:
+        url: "{{ swingbench_url }}"
+        dest: "/tmp/swingbench.zip"
+        timeout: 300
+      when: not swingbench_bin_stat.stat.exists
+
+    - name: Create SwingBench versioned directory
+      file:
+        path: "{{ swingbench_path }}"
+        state: directory
+        mode: '0755'
+        owner: "{{ system_user }}"
+        group: "{{ system_group }}"
+      when: not swingbench_bin_stat.stat.exists
+
+    - name: Extract SwingBench to temporary location
+      unarchive:
+        src: "/tmp/swingbench.zip"
+        dest: "/tmp"
+        remote_src: yes
+        owner: "{{ system_user }}"
+        group: "{{ system_group }}"
+      when: not swingbench_bin_stat.stat.exists
+        
+    - name: Move SwingBench contents to versioned directory  
+      shell: mv /tmp/swingbench/* {{ swingbench_path }}/
+      when: not swingbench_bin_stat.stat.exists
+
+    - name: Make SwingBench binaries executable
+      file:
+        path: "{{ swingbench_path }}/bin"
+        mode: '0755'
+        recurse: yes
+      when: not swingbench_bin_stat.stat.exists
+
+    - name: Create scripts base directory
+      file:
+        path: "{{ scripts_base_path }}"
+        state: directory
+        mode: '0755'
+        owner: "{{ system_user }}"
+        group: "{{ system_group }}"
+
+    - name: Create SwingBench scripts directory
+      file:
+        path: "{{ scripts_base_path }}/swingbench"
+        state: directory
+        mode: '0755'
+        owner: "{{ system_user }}"
+        group: "{{ system_group }}"
+
+    - name: Copy SwingBench scripts to organized location
+      copy:
+        src: ../../scripts/swingbench/
+        dest: "{{ scripts_base_path }}/swingbench/"
+        mode: '0755'
+        owner: "{{ system_user }}"
+        group: "{{ system_group }}"
+
+    - name: Create SwingBench results directory within scripts
+      file:
+        path: "{{ scripts_base_path }}/swingbench/results"
+        state: directory
+        mode: '0755'
+        owner: "{{ system_user }}"
+        group: "{{ system_group }}"
+
+    - name: Create environment file template
+      template:
+        src: ../../templates/swingbench.env.j2
+        dest: "{{ scripts_base_path }}/swingbench/.env"
+        mode: '0644'
+        owner: "{{ system_user }}"
+        group: "{{ system_group }}"
+
+    - name: Set executable permissions on SwingBench scripts
+      shell: find {{ scripts_base_path }}/swingbench -name "*.sh" -exec chmod +x {} \;
+
+    - name: Display installation summary
+      debug:
+        msg: |
+          ✅ SwingBench installation completed successfully!
+          
+          Installation Details:
+          - SwingBench Path: {{ swingbench_path }}
+          - Scripts Path: {{ scripts_base_path }}/swingbench
+          - Results Path: {{ scripts_base_path }}/swingbench/results
+          - Java Version: {{ java_version_after.stdout }}
+          
+          Next Steps:
+          1. Configure the .env file at {{ scripts_base_path }}/swingbench/.env
+          2. Update TNS configuration if needed
+          3. Run schema build: cd {{ scripts_base_path }}/swingbench && ./build-soe-schema.sh
+          4. Run benchmark: cd {{ scripts_base_path }}/swingbench && ./run-soe-benchmark.sh 

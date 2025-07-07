@@ -10,10 +10,10 @@ fi
 
 # Check required variables
 : "${ORACLE_SYSTEM_PASSWORD:?Need to set ORACLE_SYSTEM_PASSWORD}"
-: "${ORACLE_INSTANCE:?Need to set ORACLE_INSTANCE}"
+: "${ORACLE_SID:?Need to set ORACLE_SID}"
 
 # Connect to SQL*Plus and execute the drop statement
-sqlplus -s "system/${ORACLE_SYSTEM_PASSWORD}@${ORACLE_INSTANCE}" <<EOF
+sqlplus -s "system/${ORACLE_SYSTEM_PASSWORD}@${ORACLE_SID}" <<EOF
 WHENEVER SQLERROR EXIT SQL.SQLCODE
 DROP USER tpcc CASCADE;
 EXIT;

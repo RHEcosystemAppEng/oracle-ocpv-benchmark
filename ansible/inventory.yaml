@@ -9,6 +9,7 @@ all:
           ansible_python_interpreter: /usr/libexec/platform-python
       vars:
         # TNS Configuration (multiple entries)
+        default_tns_entry: "ORALAB_STANDALONE"  # Default TNS entry to use
         oracle_tns_entries:
           - tns_name: "ORALAB"
             host: <oralab-oracle-rac host name>
@@ -19,7 +20,14 @@ all:
             port: "1521"
             sid: "pdb1"
 
-        tns_admin_path: /opt/HammerDB/hammerdb-oracle-tns
+        # OCPV Benchmark Base Configuration
+        benchmark_base_path: /opt/ocpv-benchmark
+        tns_admin_path: "{{ benchmark_base_path }}/tns"
+
+        # System User Configuration
+        system_user: cloud-user
+        system_group: cloud-user
+        user_home_path: "/home/{{ system_user }}"
 
         # Oracle Client Installation
         oracle_major_version: 19.26
@@ -29,5 +37,12 @@ all:
 
         # HammerDB Setup
         hammerdb_version: 4.12
-        hammerdb_base_path: /opt/HammerDB
-        oracle_client_home: /usr/lib/oracle/19.26/client64
+        hammerdb_base_path: "{{ benchmark_base_path }}/hammerdb"
+        hammerdb_install_path: "{{ hammerdb_base_path }}/{{ hammerdb_version }}"
+
+        # SwingBench Setup (Unix/Linux/Windows JDK 11, Updated November 4th 2023)
+        swingbench_base_path: "{{ benchmark_base_path }}/swingbench"
+        swingbench_version: 20231104_jdk11
+
+        # Scripts Configuration
+        scripts_base_path: "{{ benchmark_base_path }}/scripts"

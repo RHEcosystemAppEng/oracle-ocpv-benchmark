@@ -12,7 +12,7 @@ set env(LD_LIBRARY_PATH)  "$env(ORACLE_HOME)/lib"
 # Set connection parameters
 diset connection system_user     [expr {[info exists ::env(ORACLE_SYSTEM_USER)] ? $::env(ORACLE_SYSTEM_USER) : "system"}]
 diset connection system_password [expr {[info exists ::env(ORACLE_SYSTEM_PASSWORD)] ? $::env(ORACLE_SYSTEM_PASSWORD) : "password"}]
-diset connection instance        [expr {[info exists ::env(ORACLE_INSTANCE)] ? $::env(ORACLE_INSTANCE) : "oralab"}]
+diset connection instance        [expr {[info exists ::env(ORACLE_SID)] ? $::env(ORACLE_SID) : "oralab"}]
 
 # Set TPCC parameters
 set count_ware [expr {[info exists ::env(ORA_COUNT_WARE)] ? $::env(ORA_COUNT_WARE) : 10}]
