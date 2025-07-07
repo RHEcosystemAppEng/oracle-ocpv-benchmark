@@ -4,7 +4,7 @@
   become: yes
   tasks:
     - name: Load common variables
-      include_vars: ../vars/common.yml
+      include_vars: ../../vars/common.yml
       
     - name: Create TNS Admin directory
       file:
@@ -16,7 +16,7 @@
 
     - name: Generate tnsnames.ora from template
       template:
-        src: ../templates/tnsnames.ora.j2
+        src: ../../templates/tnsnames.ora.j2
         dest: "{{ tns_admin_path }}/tnsnames.ora"
         mode: '0644'
         owner: "{{ system_user }}"

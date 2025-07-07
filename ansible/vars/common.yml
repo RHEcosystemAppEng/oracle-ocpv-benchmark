@@ -5,11 +5,11 @@
 default_tns_entry: "ORALAB_STANDALONE"  # Default TNS entry to use
 oracle_tns_entries:
   - tns_name: "ORALAB"
-    host: <oralab-oracle-rac host name>
+    host: oralab-scan.oracle-rac.openinfra.lab
     port: "1521"
     sid: "pdb1"
   - tns_name: "ORALAB_STANDALONE"
-    host: <oralab-oracle-standalone host name>
+    host: oralab-standalone1.oracle-rac.openinfra.lab
     port: "1521"
     sid: "pdb1"
 

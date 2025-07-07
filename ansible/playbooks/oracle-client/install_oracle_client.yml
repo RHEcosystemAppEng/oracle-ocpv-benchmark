@@ -9,7 +9,7 @@
 
   tasks:
     - name: Load common variables
-      include_vars: ../vars/common.yml
+      include_vars: ../../vars/common.yml
       
     - name: Check if Oracle Instant Client is already installed
       stat:
@@ -73,41 +73,7 @@
           Something went wrong during the installation.
           {% endif %}
 
-    - name: Install Oracle Instant Client Basic
-      dnf:
-        name: "{{ base_url }}/oracle-instantclient-basic-{{ oracle_major_version }}-{{ oracle_minor_version }}.x86_64.rpm"
-        state: present
-        disable_gpg_check: yes
 
-    - name: Install Oracle Instant Client SQL*Plus
-      dnf:
-        name: "{{ base_url }}/oracle-instantclient-sqlplus-{{ oracle_major_version }}-{{ oracle_minor_version }}.x86_64.rpm"
-        state: present
-        disable_gpg_check: yes
-
-    - name: Install Oracle Instant Client Tools
-      dnf:
-        name: "{{ base_url }}/oracle-instantclient-tools-{{ oracle_major_version }}-{{ oracle_minor_version }}.x86_64.rpm"
-        state: present
-        disable_gpg_check: yes
-
-    - name: Install Oracle Instant Client Development
-      dnf:
-        name: "{{ base_url }}/oracle-instantclient-devel-{{ oracle_major_version }}-{{ oracle_minor_version }}.x86_64.rpm"
-        state: present
-        disable_gpg_check: yes
-
-    - name: Install Oracle Instant Client JDBC
-      dnf:
-        name: "{{ base_url }}/oracle-instantclient-jdbc-{{ oracle_major_version }}-{{ oracle_minor_version }}.x86_64.rpm"
-        state: present
-        disable_gpg_check: yes
-
-    - name: Install Oracle Instant Client ODBC
-      dnf:
-        name: "{{ base_url }}/oracle-instantclient-odbc-{{ oracle_major_version }}-{{ oracle_minor_version }}.x86_64.rpm"
-        state: present
-        disable_gpg_check: yes
 
     - name: Create benchmark directory
       file:

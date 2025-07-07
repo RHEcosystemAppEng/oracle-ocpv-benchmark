@@ -4,11 +4,11 @@ all:
       hosts:
         oralab_vm1:
           ansible_host: <control machine ip or host>
-          ansible_user: <control machine user>
+          ansible_user: cloud-user
           ansible_ssh_private_key_file: < path of ansible_ssh_private_key_file like .pem file>
           ansible_python_interpreter: /usr/libexec/platform-python
       vars:
         # Benchmark Tool Selection (enum-like variable)
         # Valid values: "hammerdb", "swingbench", "all"
         # Default: "all" (installs both tools)
-        benchmark_tool: "all"
+        benchmark_tool: "hammerdb"
