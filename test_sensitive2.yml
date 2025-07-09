@@ -1,3 +1,0 @@
-database_host: 10.0.1.50
-admin_password: mysecretpassword123
-private_key_file: /home/user/.ssh/id_rsa
