@@ -4,11 +4,42 @@ all:
       hosts:
         oralab_vm1:
           ansible_host: <control machine ip or host>
-          ansible_user: cloud-user
+          ansible_user: <control machine user>
           ansible_ssh_private_key_file: < path of ansible_ssh_private_key_file like .pem file>
           ansible_python_interpreter: /usr/libexec/platform-python
       vars:
         # Benchmark Tool Selection (enum-like variable)
         # Valid values: "hammerdb", "swingbench", "all"
-        # Default: "all" (installs both tools)
-        benchmark_tool: "hammerdb"
+        benchmark_tool: "all"  # Default: installs both tools
+        
+        # SwingBench Configuration
+        swingbench_version: 25052023_jdk11
+        swingbench_url: "https://github.com/domgiles/swingbench-public/releases/download/historic/swingbench{{ swingbench_version }}.zip"
+        required_java_version: "11"
+        
+        # HammerDB Configuration
+        hammerdb_version: 4.12
+        
+        # TNS Configuration
+        default_tns_entry: "ORALAB_STANDALONE"
+        oracle_tns_entries:
+          - tns_name: "ORALAB"
+            host: <oralab-oracle-rac host name>
+            port: "1521"
+            sid: "pdb1"
+          - tns_name: "ORALAB_STANDALONE"
+            host: <oralab-oracle-standalone host name>
+            port: "1521"
+            sid: "pdb1"
+        
+        # System Configuration
+        benchmark_base_path: /opt/ocpv-benchmark
+        scripts_base_path: /opt/ocpv-benchmark/scripts
+        tns_admin_path: /opt/ocpv-benchmark/tns
+        system_user: cloud-user
+        system_group: cloud-user
+        
+        # Oracle Client Configuration  
+        oracle_major_version: 19.26
+        oracle_minor_version: 0.0.0-1.el8
+        oracle_home_path: /usr/lib/oracle/19.26/client64

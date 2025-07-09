@@ -49,14 +49,12 @@ The conditional logic is applied at the play level, making it clean and efficien
 ```yaml
 # HammerDB play only runs when benchmark_tool is "hammerdb" or "all"
 - name: Install and Setup HammerDB for Oracle Benchmark
-  hosts: hammerdb_oracle_client_vms
-  # ... tasks ...
+  import_playbook: playbooks/setup-hammerdb/install_setup_hammer_db.yml
   when: benchmark_tool | default('all') in ['hammerdb', 'all']
 
 # SwingBench play only runs when benchmark_tool is "swingbench" or "all"  
 - name: Install and Setup SwingBench for Oracle Benchmark
-  hosts: hammerdb_oracle_client_vms
-  # ... tasks ...
+  import_playbook: playbooks/setup-swingbench/install_setup_swingbench.yml
   when: benchmark_tool | default('all') in ['swingbench', 'all']
 ```
 

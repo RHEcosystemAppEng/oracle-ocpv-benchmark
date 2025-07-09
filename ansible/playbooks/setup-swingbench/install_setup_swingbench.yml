@@ -1,18 +1,7 @@
 - name: Install and Setup SwingBench for Oracle Benchmark
   hosts: oracle_benchmark_client_vms
   become: yes
-  vars:
-    swingbench_path: "{{ swingbench_base_path }}/{{ swingbench_version }}"
-    swingbench_url: "https://www.dominicgiles.com/site_downloads/swingbench04112023_jdk11.zip"
-    required_java_version: "11"
-    
   tasks:
-    - name: Load common variables
-      include_vars: ../../vars/common.yml
-      
-    - name: Load SwingBench-specific variables
-      include_vars: ../../vars/swingbench.yml
-      
     - name: Check Java version
       shell: java -version 2>&1 | head -n 1 | awk -F '"' '{print $2}' | awk -F '.' '{print $1}'
       register: java_version_check
@@ -42,7 +31,7 @@
 
     - name: Check if SwingBench is already installed
       stat:
-        path: "{{ swingbench_path }}/bin"
+        path: "{{ benchmark_base_path }}/swingbench/{{ swingbench_version }}/bin"
       register: swingbench_bin_stat
 
     - name: Create OCPV benchmark base directory
@@ -55,7 +44,7 @@
 
     - name: Create SwingBench base directory
       file:
-        path: "{{ swingbench_base_path }}"
+        path: "{{ benchmark_base_path }}/swingbench"
         state: directory
         mode: '0755'
         owner: "{{ system_user }}"
@@ -70,7 +59,7 @@
 
     - name: Create SwingBench versioned directory
       file:
-        path: "{{ swingbench_path }}"
+        path: "{{ benchmark_base_path }}/swingbench/{{ swingbench_version }}"
         state: directory
         mode: '0755'
         owner: "{{ system_user }}"
@@ -87,12 +76,12 @@
       when: not swingbench_bin_stat.stat.exists
         
     - name: Move SwingBench contents to versioned directory  
-      shell: mv /tmp/swingbench/* {{ swingbench_path }}/
+      shell: mv /tmp/swingbench/* {{ benchmark_base_path }}/swingbench/{{ swingbench_version }}/
       when: not swingbench_bin_stat.stat.exists
 
     - name: Make SwingBench binaries executable
       file:
-        path: "{{ swingbench_path }}/bin"
+        path: "{{ benchmark_base_path }}/swingbench/{{ swingbench_version }}/bin"
         mode: '0755'
         recurse: yes
       when: not swingbench_bin_stat.stat.exists
@@ -146,7 +135,7 @@
           ✅ SwingBench installation completed successfully!
           
           Installation Details:
-          - SwingBench Path: {{ swingbench_path }}
+          - SwingBench Path: {{ benchmark_base_path }}/swingbench/{{ swingbench_version }}
           - Scripts Path: {{ scripts_base_path }}/swingbench
           - Results Path: {{ scripts_base_path }}/swingbench/results
           - Java Version: {{ java_version_after.stdout }}

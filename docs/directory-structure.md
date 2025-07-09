@@ -29,7 +29,7 @@ This structure provides:
 │       └── src/                   # HammerDB source code
 │
 ├── swingbench/                     # SwingBench Installation Directory
-│   └── 20231104_jdk11/            # SwingBench version directory (November 4, 2023 JDK 11)
+│   └── 25052023_jdk11/            # SwingBench version directory (May 2023 - stable)
 │       ├── bin/                   # SwingBench executables (oewizard, charbench)
 │       ├── configs/               # SwingBench configuration files
 │       ├── wizardconfigs/         # SwingBench wizard configurations
@@ -59,12 +59,13 @@ This structure provides:
 │   │
 │   └── swingbench/                # SwingBench benchmark scripts
 │       ├── .env                   # SwingBench environment configuration
+│       ├── simple-swingbench-test.sh  # Quick 30-second verification test
 │       ├── build-soe-schema.sh    # Build SOE schema
 │       ├── run-soe-benchmark.sh   # Run SOE benchmark
 │       ├── build-and-run-soe.sh   # Combined build and run
 │       ├── cleanup-soe-schema.sh  # SOE schema cleanup
-│       ├── run-swingbench-test.sh # SwingBench test script
 │       └── results/               # SwingBench benchmark results
+│           ├── swingbench_simple_test.log # Simple test results
 │           ├── soe_schema_build_*.log # SOE schema build logs
 │           ├── soe_benchmark_run_*.log# SOE benchmark run logs
 │           ├── soe_results_*.xml      # XML result files
@@ -121,18 +122,29 @@ ORACLE_PORT=1521
 ### SwingBench Environment (`.env`) 
 ```bash
 # SwingBench Installation Path
-SWINGBENCH_HOME=/opt/ocpv-benchmark/swingbench/20231104_jdk11
+SWINGBENCH_HOME=/opt/ocpv-benchmark/swingbench/25052023_jdk11
 
 # SwingBench Scripts Directory
 SWINGBENCH_SCRIPTS=/opt/ocpv-benchmark/scripts/swingbench
 
-# Results Directory (relative to scripts directory)
-RESULTS_DIR=./results
+# Results Directory
+RESULTS_DIR=/opt/ocpv-benchmark/scripts/swingbench/results
 
 # Oracle Connection Details
-ORACLE_SERVICE_NAME=your_oracle_service
-ORACLE_HOST=your_oracle_host
-ORACLE_PORT=1521
+ORACLE_SID=ORALAB_STANDALONE
+TNS_ADMIN=/opt/ocpv-benchmark/tns
+
+# Database Users
+SOE_USER=soe
+SOE_PASSWORD=Chang4On
+
+# Benchmark Parameters
+SCALE_FACTOR=1
+USER_COUNT=4
+RUN_TIME=1
+
+# Benchmark Naming
+BENCHMARK_NAME=$(date +%Y%m%d_%H%M%S)
 ```
 
 ### Shared Environment Variables
@@ -161,19 +173,46 @@ ls results/                # View results
 ### SwingBench Usage  
 ```bash
 cd /opt/ocpv-benchmark/scripts/swingbench
-vi .env                    # Configure environment
-./build-and-run-soe.sh     # Run benchmark
-ls results/                # View results
+
+# Quick verification test (30 seconds)
+./simple-swingbench-test.sh
+
+# Full workflow (build schema + run benchmark)
+./build-and-run-soe.sh
+
+# Individual operations
+./build-soe-schema.sh      # Create SOE schema
+./run-soe-benchmark.sh     # Run full benchmark
+./cleanup-soe-schema.sh    # Clean up schema
+
+# View results
+ls results/                # View all results
+cat results/soe_results_*.csv  # View CSV results
 ```
+
+### SwingBench Script Descriptions
+- **`simple-swingbench-test.sh`**: Quick 30-second benchmark to verify SwingBench installation and SOE schema functionality
+- **`build-soe-schema.sh`**: Creates a fresh SOE (Sales Order Entry) schema for benchmarking
+- **`run-soe-benchmark.sh`**: Runs a configurable benchmark against the SOE schema
+- **`cleanup-soe-schema.sh`**: Removes the SOE schema and related objects
+- **`build-and-run-soe.sh`**: Automated workflow that builds schema and runs benchmark
 
 ## Ansible Deployment
 
-The entire structure is deployed using Ansible playbooks:
+The entire structure is deployed using Ansible playbooks with **consolidated variable management**:
 
 ### Main Playbooks
+- `main_setup_conditional_benchmark.yml` - **NEW**: Conditional installation based on `benchmark_tool` variable
 - `main_setup_complete_benchmark_suite.yml` - Complete installation (Oracle client + TNS + HammerDB + SwingBench)
 - `main_setup_oracle_hammerdb_benchmark.yml` - HammerDB setup (Oracle client + TNS + HammerDB)
 - `main_setup_oracle_swingbench_benchmark.yml` - SwingBench setup (Oracle client + TNS + SwingBench)
+
+### Variable Management
+All configuration variables are **consolidated in `inventory.yaml`** for easier management:
+- No separate variable files (`vars/` directory removed)
+- Single source of truth for all configuration
+- Easy to modify versions, URLs, and paths
+- Host-specific variables alongside inventory definition
 
 ### Individual Component Playbooks
 - `playbooks/oracle-client/install_oracle_client.yml` - Oracle Instant Client installation
@@ -190,21 +229,10 @@ The entire structure is deployed using Ansible playbooks:
 
 ### Upgrade Path
 - Individual tools can be upgraded in their respective directories
-- Scripts can be updated independently
-- Results from different versions are preserved
+- Scripts automatically use the configured version paths
+- Results are preserved across upgrades
 
-### Troubleshooting
-- Check tool-specific logs in each tool's `results/` directory
-- Verify environment configuration in respective `.env` files  
-- Test TNS connectivity using shared `tns/tnsnames.ora`
-- Validate installation paths match the documented structure
-
-## Version Information
-
-### Current Tool Versions
-- **HammerDB**: 4.12 (stored in `/opt/ocpv-benchmark/hammerdb/4.12/`)
-- **SwingBench**: November 4, 2023 JDK 11 release (stored in `/opt/ocpv-benchmark/swingbench/20231104_jdk11/`)
-- **Oracle Instant Client**: 19.26 (system-installed in `/usr/lib/oracle/19.26/client64/`)
-- **Java**: OpenJDK 11 (required for SwingBench)
-
-This organized structure provides a scalable foundation for Oracle database benchmarking on OpenShift Virtualization platforms. 
+### Monitoring
+- Log files are centrally located in `results/` directories
+- Each operation generates timestamped logs
+- CSV and XML results provide structured data for analysis 

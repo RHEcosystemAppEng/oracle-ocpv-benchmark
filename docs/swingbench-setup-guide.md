@@ -14,7 +14,7 @@ ansible-playbook -i inventory.yaml playbooks/setup-swingbench/install_setup_swin
 This creates the following directory structure:
 ```
 /opt/ocpv-benchmark/
-├── swingbench/20231104_jdk11/     # SwingBench binaries
+├── swingbench/25052023_jdk11/     # SwingBench binaries (May 2023 - stable)
 ├── scripts/swingbench/            # Test scripts and .env
 ├── scripts/swingbench/results/    # Test results
 └── tns/                           # TNS configuration
@@ -40,7 +40,15 @@ export SCALE_FACTOR=1    # Schema size multiplier
 
 ## Running Tests
 
-### Option 1: Separate Steps
+### Option 1: Quick Verification Test
+```bash
+cd /opt/ocpv-benchmark/scripts/swingbench
+
+# Quick 30-second test to verify installation
+./simple-swingbench-test.sh
+```
+
+### Option 2: Separate Steps
 ```bash
 cd /opt/ocpv-benchmark/scripts/swingbench
 
@@ -51,7 +59,7 @@ cd /opt/ocpv-benchmark/scripts/swingbench
 ./run-soe-benchmark.sh
 ```
 
-### Option 2: Combined
+### Option 3: Combined Workflow
 ```bash
 cd /opt/ocpv-benchmark/scripts/swingbench
 ./build-and-run-soe.sh
@@ -72,11 +80,27 @@ export SCALE_FACTOR=5
 ./build-soe-schema.sh
 ```
 
+## Available Scripts
+
+- **`simple-swingbench-test.sh`**: Quick 30-second benchmark to verify SwingBench installation and SOE schema functionality
+- **`build-soe-schema.sh`**: Creates a fresh SOE (Sales Order Entry) schema for benchmarking
+- **`run-soe-benchmark.sh`**: Runs a configurable benchmark against the SOE schema
+- **`cleanup-soe-schema.sh`**: Removes the SOE schema and related objects
+- **`build-and-run-soe.sh`**: Automated workflow that builds schema and runs benchmark
+
+## Results
+
+All benchmark results are saved to `/opt/ocpv-benchmark/scripts/swingbench/results/` with the following files:
+
+- **`swingbench_simple_test.log`**: Simple test output
+- **`soe_schema_build_YYYYMMDD_HHMMSS.log`**: Schema build logs
+- **`soe_benchmark_run_YYYYMMDD_HHMMSS.log`**: Benchmark run logs
+- **`soe_results_YYYYMMDD_HHMMSS.xml`**: XML results
+- **`soe_results_YYYYMMDD_HHMMSS.csv`**: CSV results with key metrics (TPS, Response Time, Error Rate)
+
 ## Notes
 
 Tests run longer than specified `RUN_TIME` due to ramp-up/down phases. `RUN_TIME=1` typically takes 3-4 minutes total.
-
-Results are saved to `/opt/ocpv-benchmark/scripts/swingbench/results/` with key metrics: TPS, Response Time, Error Rate.
 
 ## Troubleshooting
 
@@ -84,4 +108,8 @@ Results are saved to `/opt/ocpv-benchmark/scripts/swingbench/results/` with key 
 
 **Schema conflicts**: `./cleanup-soe-schema.sh`
 
-**Monitor tests**: `tail -f /opt/ocpv-benchmark/scripts/swingbench/results/soe_benchmark_run_*.log` 
+**Monitor tests**: `tail -f /opt/ocpv-benchmark/scripts/swingbench/results/soe_benchmark_run_*.log`
+
+**Config file issues**: Scripts automatically restore SwingBench config files from backups
+
+**Java version**: Ensure Java 11 is installed: `java -version` 

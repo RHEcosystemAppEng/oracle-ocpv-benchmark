@@ -1,8 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
-# Source environment variables
-source .env
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Source environment variables from the same directory as the script
+source "$SCRIPT_DIR/.env"
 
 echo "=================================================="
 echo "SwingBench SOE: Build Schema and Run Benchmark"

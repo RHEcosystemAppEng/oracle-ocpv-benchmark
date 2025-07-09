@@ -8,9 +8,6 @@
     oracle_home_path: "/usr/lib/oracle/{{ oracle_major_version }}/client64"
 
   tasks:
-    - name: Load common variables
-      include_vars: ../../vars/common.yml
-      
     - name: Check if Oracle Instant Client is already installed
       stat:
         path: "{{ oracle_home_path }}"

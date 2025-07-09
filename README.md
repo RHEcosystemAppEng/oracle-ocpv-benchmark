@@ -15,6 +15,7 @@ This project provides comprehensive tooling to automate **Oracle database perfor
 - [SwingBench](https://www.dominicgiles.com/swingbench.html) Sales Order Entry (SOE) benchmarks
 - JDK 11 prerequisite checking and installation
 - Comprehensive schema building and benchmark execution
+- Ready-to-use scripts for quick testing and full benchmarking
 
 ### 🚀 **Ansible Automation**
 Included **Ansible playbooks** handle:
@@ -48,11 +49,7 @@ oracle-ocpv-benchmark-eco/
 │   ├── main_setup_conditional_benchmark.yml            # Conditional installation based on benchmark_tool variable
 │   ├── main_setup_oracle_hammerdb_benchmark.yml        # HammerDB setup (Oracle client + TNS + HammerDB)
 │   ├── main_setup_oracle_swingbench_benchmark.yml      # SwingBench setup (Oracle client + TNS + SwingBench)
-│   ├── inventory.yaml                                   # Ansible inventory configuration
-│   ├── vars/                                            # Variable files
-│   │   ├── common.yml                                   # Common variables (TNS, Oracle client, system config)
-│   │   ├── hammerdb.yml                                 # HammerDB-specific variables
-│   │   └── swingbench.yml                               # SwingBench-specific variables
+│   ├── inventory.yaml                                   # Ansible inventory + consolidated variables configuration
 │   ├── playbooks/                                       # Individual component playbooks
 │   │   ├── oracle-client/                               # Oracle Instant Client installation
 │   │   ├── configure-tnsnames/                          # TNS configuration
@@ -65,6 +62,7 @@ oracle-ocpv-benchmark-eco/
 │   │   │   ├── generate_awr_html_report.sh              # AWR report generation
 │   │   │   └── awr_reports/                             # AWR report templates
 │   │   └── swingbench/                                  # SwingBench source scripts
+│   │       ├── simple-swingbench-test.sh                # Quick 30-second verification test
 │   │       ├── build-soe-schema.sh                      # SOE schema builder
 │   │       ├── run-soe-benchmark.sh                     # SOE benchmark runner
 │   │       ├── build-and-run-soe.sh                     # Combined build and run
@@ -88,10 +86,22 @@ After deployment, the target VM will have this organized structure:
 ```
 /opt/ocpv-benchmark/                            # Base installation directory
 ├── hammerdb/4.12/                              # HammerDB installation
-├── swingbench/20231104_jdk11/                  # SwingBench installation (Nov 2023, JDK 11)
+├── swingbench/25052023_jdk11/                  # SwingBench installation (May 2023 - stable)
 ├── scripts/                                    # Benchmark execution scripts
 │   ├── hammerdb/                               # HammerDB scripts + results
 │   └── swingbench/                             # SwingBench scripts + results
+│       ├── .env                                # Environment configuration
+│       ├── simple-swingbench-test.sh           # Quick verification test
+│       ├── build-soe-schema.sh                 # Schema creation
+│       ├── run-soe-benchmark.sh                # Full benchmark execution
+│       ├── build-and-run-soe.sh                # Combined workflow
+│       ├── cleanup-soe-schema.sh               # Schema cleanup
+│       └── results/                            # Benchmark results directory
+│           ├── swingbench_simple_test.log      # Simple test results
+│           ├── soe_schema_build_*.log          # Schema build logs
+│           ├── soe_benchmark_run_*.log         # Benchmark execution logs
+│           ├── soe_results_*.xml               # XML benchmark results
+│           └── soe_results_*.csv               # CSV benchmark results
 └── tns/                                        # Shared TNS configuration
     └── tnsnames.ora
 ```
@@ -145,58 +155,77 @@ all:
 
 ### 2. Configure Variables
 
-The project uses modular variable files for better organization:
+**NEW**: All variables are now **consolidated in `inventory.yaml`** for easier management:
 
-#### `vars/common.yml` - Common Configuration
 ```yaml
-# System Configuration
-system_user: cloud-user
-system_group: cloud-user
-user_home_path: "/home/{{ system_user }}"
-
-# Base paths
-benchmark_base_path: /opt/ocpv-benchmark
-
-# Oracle client configuration
-oracle_major_version: 19.26
-oracle_minor_version: 0.0.0-1.el8
-oracle_home_path: /usr/lib/oracle/19.26/client64
-
-# TNS configuration
-oracle_host: <oracle-scan-host>              # Oracle RAC SCAN or host
-oracle_port: 1521
-oracle_sid: <pdb-name>                       # Database service name
-oracle_tns_name: ORALAB
-
-# Scripts configuration
-scripts_base_path: "{{ benchmark_base_path }}/scripts"
+all:
+  children:
+    oracle_benchmark_client_vms:
+      hosts:
+        oralab_vm1:
+          ansible_host: <vm-ip-address>
+          ansible_user: <vm-username>
+          ansible_ssh_private_key_file: ~/.ssh/id_rsa
+      vars:
+        # Benchmark Tool Selection
+        benchmark_tool: "all"  # Values: "hammerdb", "swingbench", "all"
+        
+        # SwingBench Configuration
+        swingbench_version: 25052023_jdk11
+        swingbench_url: "https://github.com/domgiles/swingbench-public/releases/download/historic/swingbench{{ swingbench_version }}.zip"
+        required_java_version: "11"
+        
+        # HammerDB Configuration
+        hammerdb_version: 4.12
+        
+        # TNS Configuration
+        default_tns_entry: "ORALAB_STANDALONE"
+        oracle_tns_entries:
+          - tns_name: "ORALAB"
+            host: <oralab-oracle-rac host name>  # Your Oracle RAC SCAN
+            port: "1521"
+            sid: "pdb1"                                  # Your PDB name
+          - tns_name: "ORALAB_STANDALONE" 
+            host: <oralab-oracle-standalone host name>  # Your standalone host
+            port: "1521"
+            sid: "pdb1"
+        
+        # System Configuration
+        benchmark_base_path: /opt/ocpv-benchmark
+        scripts_base_path: /opt/ocpv-benchmark/scripts
+        tns_admin_path: /opt/ocpv-benchmark/tns
+        system_user: cloud-user
+        system_group: cloud-user
+        
+        # Oracle Client Configuration
+        oracle_major_version: 19.26
+        oracle_minor_version: 0.0.0-1.el8
+        oracle_home_path: /usr/lib/oracle/19.26/client64
 ```
 
-#### `vars/hammerdb.yml` - HammerDB Configuration
-```yaml
-# HammerDB configuration
-hammerdb_version: 4.12
-hammerdb_base_path: "{{ benchmark_base_path }}/hammerdb"
-hammerdb_home_path: "{{ hammerdb_base_path }}/{{ hammerdb_version }}"
-```
-
-#### `vars/swingbench.yml` - SwingBench Configuration
-```yaml
-# SwingBench configuration
-swingbench_version: 20231104_jdk11
-swingbench_base_path: "{{ benchmark_base_path }}/swingbench"
-swingbench_home_path: "{{ swingbench_base_path }}/{{ swingbench_version }}"
-```
+#### Benefits of Consolidated Variables:
+✅ **Single Source of Truth**: All configuration in one file  
+✅ **Easier Maintenance**: No separate variable files to manage  
+✅ **Better Organization**: Variables alongside inventory definition  
+✅ **Simplified Structure**: No `vars/` directory needed
 
 ### 3. Deploy with Selective Tool Installation
 
-**New**: Use the `benchmark_tool` variable to control which tools are installed:
+**NEW**: Use the **conditional playbook** with the `benchmark_tool` variable for selective installation:
 
 ```bash
 cd ansible
 
-# Test connectivity
+# Test connectivity first
 ansible -i inventory.yaml -m ping oracle_benchmark_client_vms
+
+# Deploy based on benchmark_tool setting in inventory.yaml
+ansible-playbook -i inventory.yaml main_setup_conditional_benchmark.yml
+
+# Override at runtime to install specific tools
+ansible-playbook -i inventory.yaml main_setup_conditional_benchmark.yml -e benchmark_tool=hammerdb
+ansible-playbook -i inventory.yaml main_setup_conditional_benchmark.yml -e benchmark_tool=swingbench
+ansible-playbook -i inventory.yaml main_setup_conditional_benchmark.yml -e benchmark_tool=all
 
 # Install both tools (default)
 ansible-playbook -i inventory.yaml main_setup_conditional_benchmark.yml
