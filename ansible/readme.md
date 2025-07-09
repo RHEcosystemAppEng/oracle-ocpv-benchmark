@@ -187,7 +187,7 @@ ansible-playbook -i inventory.yaml playbooks/setup-swingbench/install_setup_swin
 
 #### Variable Configuration
 
-All variables are now consolidated in `inventory.yaml`. To customize:
+All variables are in `inventory.yaml`. To customize:
 
 1. **Change benchmark tool selection**: Modify `benchmark_tool` in inventory.yaml
 2. **Update Oracle connectivity**: Modify `oracle_tns_entries` section

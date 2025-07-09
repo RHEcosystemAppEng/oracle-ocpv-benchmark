@@ -207,13 +207,6 @@ The entire structure is deployed using Ansible playbooks with **consolidated var
 - `main_setup_oracle_hammerdb_benchmark.yml` - HammerDB setup (Oracle client + TNS + HammerDB)
 - `main_setup_oracle_swingbench_benchmark.yml` - SwingBench setup (Oracle client + TNS + SwingBench)
 
-### Variable Management
-All configuration variables are **consolidated in `inventory.yaml`** for easier management:
-- No separate variable files (`vars/` directory removed)
-- Single source of truth for all configuration
-- Easy to modify versions, URLs, and paths
-- Host-specific variables alongside inventory definition
-
 ### Individual Component Playbooks
 - `playbooks/oracle-client/install_oracle_client.yml` - Oracle Instant Client installation
 - `playbooks/configure-tnsnames/configure_tnsnames.yml` - TNS configuration

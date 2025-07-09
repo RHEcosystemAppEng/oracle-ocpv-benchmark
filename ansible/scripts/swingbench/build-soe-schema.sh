@@ -94,13 +94,13 @@ if [ ! -f "$CONFIG_FILE" ]; then
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <SwingBenchConfiguration>
   <Connection>
-    <UserName>soe</UserName>
-    <Password>soe</Password>
-    <ConnectString>localhost:1521:xe</ConnectString>
+    <UserName>$SOE_USER</UserName>
+    <Password>$SOE_PASSWORD</Password>
+    <ConnectString>$ORACLE_SID</ConnectString>
     <DriverType>thin</DriverType>
   </Connection>
   <Settings>
-    <Scale>1</Scale>
+    <Scale>$SCALE_FACTOR</Scale>
     <Compress>false</Compress>
   </Settings>
 </SwingBenchConfiguration>
