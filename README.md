@@ -155,8 +155,6 @@ all:
 
 ### 2. Configure Variables
 
-**NEW**: All variables are now **consolidated in `inventory.yaml`** for easier management:
-
 ```yaml
 all:
   children:
@@ -168,7 +166,7 @@ all:
           ansible_ssh_private_key_file: ~/.ssh/id_rsa
       vars:
         # Benchmark Tool Selection
-        benchmark_tool: "all"  # Values: "hammerdb", "swingbench", "all"
+        benchmark_tool: "hammerdb"  # Values: "hammerdb", "swingbench", "all"
         
         # SwingBench Configuration
         swingbench_version: 25052023_jdk11
@@ -289,20 +287,6 @@ ansible-playbook -i inventory.yaml main_setup_conditional_benchmark.yml -e bench
 # For specific host groups
 ansible-playbook -i inventory.yaml main_setup_conditional_benchmark.yml -e benchmark_tool=all
 ```
-
-### Variable Structure
-
-Variables are organized into separate files for better maintainability:
-
-- **`vars/common.yml`**: TNS configuration, Oracle client settings, system user config, base paths
-- **`vars/hammerdb.yml`**: HammerDB version and paths
-- **`vars/swingbench.yml`**: SwingBench version and paths
-
-This approach:
-- **Improves readability** of the inventory file
-- **Enables easy customization** per tool
-- **Supports future expansion** with additional tools
-- **Maintains consistent configuration** across playbooks
 
 ---
 
