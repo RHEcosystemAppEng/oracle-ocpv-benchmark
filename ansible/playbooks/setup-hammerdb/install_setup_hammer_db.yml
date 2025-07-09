@@ -1,8 +1,6 @@
 - name: Install and Setup HammerDB for Oracle Benchmark
-  hosts: hammerdb_oracle_client_vms
+  hosts: oracle_benchmark_client_vms
   become: yes
-  vars:
-    hammerdb_path: "{{ hammerdb_base_path }}/{{ hammerdb_version }}"
   tasks:
     - name: Install tcl using raw command
       raw: dnf install -y tcl
@@ -12,7 +10,7 @@
 
     - name: Check if HammerDB is already extracted
       stat:
-        path: "{{ hammerdb_path }}"
+        path: "{{ benchmark_base_path }}/hammerdb/{{ hammerdb_version }}"
       register: hammerdb_dir_stat
 
     - name: Download HammerDB if not already downloaded
@@ -21,25 +19,74 @@
         dest: "/tmp/HammerDB-{{ hammerdb_version }}.tar.gz"
       when: hammerdb_dir_stat.stat.exists == false
 
-    - name: Ensure HammerDB target path exists
+    - name: Create OCPV benchmark base directory
       file:
-        path: "{{ hammerdb_path }}"
+        path: "{{ benchmark_base_path }}"
         state: directory
         mode: '0755'
+        owner: "{{ system_user }}"
+        group: "{{ system_group }}"
+
+    - name: Create HammerDB base directory
+      file:
+        path: "{{ benchmark_base_path }}/hammerdb"
+        state: directory
+        mode: '0755'
+        owner: "{{ system_user }}"
+        group: "{{ system_group }}"
+
+    - name: Ensure HammerDB target path exists
+      file:
+        path: "{{ benchmark_base_path }}/hammerdb/{{ hammerdb_version }}"
+        state: directory
+        mode: '0755'
+        owner: "{{ system_user }}"
+        group: "{{ system_group }}"
 
     - name: Extract HammerDB if not already extracted
       unarchive:
         src: "/tmp/HammerDB-{{ hammerdb_version }}.tar.gz"
-        dest: "{{ hammerdb_path }}"
+        dest: "{{ benchmark_base_path }}/hammerdb/{{ hammerdb_version }}"
         remote_src: yes
         extra_opts: [--strip-components=1]
       when: hammerdb_dir_stat.stat.exists == false
 
-    - name: Copy scripts directory to target vm's benchmark_scripts folder recursively
-      copy:
-          src: ../../scripts/
-          dest: "{{ hammerdb_base_path }}/benchmark_scripts"
-          mode: '0755'
+    - name: Create scripts base directory
+      file:
+        path: "{{ scripts_base_path }}"
+        state: directory
+        mode: '0755'
+        owner: "{{ system_user }}"
+        group: "{{ system_group }}"
 
-    - name: Recursively change ownership and permissions so that scripts are executable.
-      ansible.builtin.command: chown -R cloud-user:cloud-user {{ hammerdb_base_path }}/benchmark_scripts
+    - name: Create HammerDB scripts directory
+      file:
+        path: "{{ scripts_base_path }}/hammerdb"
+        state: directory
+        mode: '0755'
+        owner: "{{ system_user }}"
+        group: "{{ system_group }}"
+
+    - name: Copy HammerDB scripts to organized location
+      copy:
+        src: ../../scripts/hammerdb/
+        dest: "{{ scripts_base_path }}/hammerdb/"
+        mode: '0755'
+        owner: "{{ system_user }}"
+        group: "{{ system_group }}"
+
+    - name: Create HammerDB results directory within scripts
+      file:
+        path: "{{ scripts_base_path }}/hammerdb/results"
+        state: directory
+        mode: '0755'
+        owner: "{{ system_user }}"
+        group: "{{ system_group }}"
+
+    - name: Create environment file template for HammerDB
+      template:
+        src: ../../templates/hammerdb.env.j2
+        dest: "{{ scripts_base_path }}/hammerdb/.env"
+        mode: '0644'
+        owner: "{{ system_user }}"
+        group: "{{ system_group }}"

@@ -9,4 +9,6 @@
 !/oracle-net/.gitkeep
 /oracle-net/*
 
+# Backup files with sensitive information
+*.backup
 

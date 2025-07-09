@@ -139,7 +139,7 @@ AWR generation scripts are available only on the database server so you have to 
 
 **Steps:**
 
-export TNS_ADMIN=/home/cloud-user/hammerdb-tnsnames
+export TNS_ADMIN=<path to TNS admin directory>
 
 1.  **Connect to the PDB:**
     Establish an SQL session within the target PDB (e.g., `pdb01`).

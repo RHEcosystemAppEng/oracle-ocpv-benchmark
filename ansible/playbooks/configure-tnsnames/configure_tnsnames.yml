@@ -1,17 +1,37 @@
-- name: Configure Oracle Client tnsnames.ora
-  hosts: hammerdb_oracle_client_vms
+---
+- name: Configure TNS Names for Oracle Connectivity
+  hosts: oracle_benchmark_client_vms
   become: yes
   tasks:
-    - name: Ensure the {{ tns_admin_path }} directory exists
+    - name: Create TNS Admin directory
       file:
         path: "{{ tns_admin_path }}"
         state: directory
         mode: '0755'
+        owner: "{{ system_user }}"
+        group: "{{ system_group }}"
 
-    - name: Create tnsnames.ora file for Oracle client
+    - name: Generate tnsnames.ora from template
       template:
-        src: "../../templates/tnsnames.ora.j2"
+        src: ../../templates/tnsnames.ora.j2
         dest: "{{ tns_admin_path }}/tnsnames.ora"
         mode: '0644'
-      vars:
-        tns_entries: "{{ oracle_tns_entries }}"
+        owner: "{{ system_user }}"
+        group: "{{ system_group }}"
+
+    - name: Display TNS configuration summary
+      debug:
+        msg: |
+          ✅ TNS configuration completed successfully!
+          
+          Configuration Details:
+          - TNS Admin Path: {{ tns_admin_path }}
+          - TNS Names File: {{ tns_admin_path }}/tnsnames.ora
+          - Default TNS Entry: {{ default_tns_entry }}
+          - Available TNS Entries: {{ oracle_tns_entries | map(attribute='tns_name') | join(', ') }}
+          
+          Environment Variables:
+          - TNS_ADMIN={{ tns_admin_path }}
+          
+          Test Connection:
+          sqlplus <username>/<password>@{{ default_tns_entry }}
