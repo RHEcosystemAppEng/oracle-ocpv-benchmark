@@ -168,13 +168,13 @@ all:
         # Benchmark Tool Selection
         benchmark_tool: "hammerdb"  # Values: "hammerdb", "swingbench", "all"
         
+        # HammerDB Configuration
+        hammerdb_version: 4.12
+        
         # SwingBench Configuration
         swingbench_version: 25052023_jdk11
         swingbench_url: "https://github.com/domgiles/swingbench-public/releases/download/historic/swingbench{{ swingbench_version }}.zip"
         required_java_version: "11"
-        
-        # HammerDB Configuration
-        hammerdb_version: 4.12
         
         # TNS Configuration
         default_tns_entry: "ORALAB_STANDALONE"

@@ -102,7 +102,7 @@ This structure provides:
 
 Each tool maintains its own environment configuration:
 
-### HammerDB Environment (`.env`)
+### HammerDB Environment (`.env`) - Default Tool
 ```bash
 # HammerDB Installation Path
 HAMMERDB_HOME=/opt/ocpv-benchmark/hammerdb/4.12
@@ -162,7 +162,7 @@ BENCHMARK_BASE_PATH=/opt/ocpv-benchmark
 
 ## Usage Patterns
 
-### HammerDB Usage
+### HammerDB Usage (Default Tool)
 ```bash
 cd /opt/ocpv-benchmark/scripts/hammerdb
 vi .env                    # Configure environment
