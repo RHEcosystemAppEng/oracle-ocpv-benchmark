@@ -4,9 +4,9 @@
 The `benchmark_tool` variable acts as an enum that controls which benchmark tools get installed. This provides flexibility to install HammerDB only, SwingBench only, or both tools.
 
 ## Valid Values
-- `"hammerdb"` - Install only HammerDB
-- `"swingbench"` - Install only SwingBench  
-- `"all"` - Install both tools (default)
+- `"hammerdb"` - Install HammerDB only (default)
+- `"swingbench"` - Install only SwingBench
+- `"all"` - Install both tools
 
 ## Configuration
 
@@ -14,14 +14,14 @@ The `benchmark_tool` variable acts as an enum that controls which benchmark tool
 In `inventory.yaml`, the default is set to install both tools:
 ```yaml
 vars:
-  benchmark_tool: "all"  # Default: installs both HammerDB and SwingBench
+  benchmark_tool: "hammerdb"  # Default: installs HammerDB only
 ```
 
 ### Override at Runtime
 You can override the variable when running the playbook:
 
 ```bash
-# Install both tools (default behavior)
+# Install HammerDB only (default behavior)
 ansible-playbook -i inventory.yaml main_setup_conditional_benchmark.yml
 
 # Install only HammerDB

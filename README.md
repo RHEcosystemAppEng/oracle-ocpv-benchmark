@@ -150,7 +150,7 @@ all:
           ansible_ssh_private_key_file: ~/.ssh/id_rsa  # SSH key path
       vars:
         # Benchmark tool selection (enum: "hammerdb", "swingbench", "all")
-        benchmark_tool: all                      # Default: install both tools
+        benchmark_tool: hammerdb                 # Default: install HammerDB only
 ```
 
 ### 2. Configure Variables
@@ -203,12 +203,6 @@ all:
         oracle_home_path: /usr/lib/oracle/19.26/client64
 ```
 
-#### Benefits of Consolidated Variables:
-✅ **Single Source of Truth**: All configuration in one file  
-✅ **Easier Maintenance**: No separate variable files to manage  
-✅ **Better Organization**: Variables alongside inventory definition  
-✅ **Simplified Structure**: No `vars/` directory needed
-
 ### 3. Deploy with Selective Tool Installation
 
 **NEW**: Use the **conditional playbook** with the `benchmark_tool` variable for selective installation:
@@ -227,7 +221,7 @@ ansible-playbook -i inventory.yaml main_setup_conditional_benchmark.yml -e bench
 ansible-playbook -i inventory.yaml main_setup_conditional_benchmark.yml -e benchmark_tool=swingbench
 ansible-playbook -i inventory.yaml main_setup_conditional_benchmark.yml -e benchmark_tool=all
 
-# Install both tools (default)
+# Install HammerDB only (default)
 ansible-playbook -i inventory.yaml main_setup_conditional_benchmark.yml
 
 # Install only HammerDB
@@ -279,9 +273,9 @@ ansible-playbook -i inventory.yaml playbooks/setup-swingbench/install_setup_swin
 
 The `benchmark_tool` variable acts as an enum to control which tools are installed:
 
-- **`all`** (default): Install both HammerDB and SwingBench
-- **`hammerdb`**: Install only HammerDB and its dependencies
+- **`hammerdb`** (default): Install only HammerDB and its dependencies
 - **`swingbench`**: Install only SwingBench and its dependencies
+- **`all`**: Install both HammerDB and SwingBench
 
 You can set this variable in multiple ways:
 

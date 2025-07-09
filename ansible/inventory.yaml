@@ -10,7 +10,7 @@ all:
       vars:
         # Benchmark Tool Selection (enum-like variable)
         # Valid values: "hammerdb", "swingbench", "all"
-        benchmark_tool: "all"  # Default: installs both tools
+        benchmark_tool: "hammerdb"  # Default: installs HammerDB only
         
         # SwingBench Configuration
         swingbench_version: 25052023_jdk11

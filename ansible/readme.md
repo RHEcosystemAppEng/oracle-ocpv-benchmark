@@ -91,7 +91,7 @@ all:
       vars:
         # Benchmark Tool Selection (enum-like variable)
         # Valid values: "hammerdb", "swingbench", "all"
-        benchmark_tool: "all"  # Default: installs both tools
+        benchmark_tool: "hammerdb"  # Default: installs HammerDB only
         
         # SwingBench Configuration
         swingbench_version: 25052023_jdk11
@@ -140,7 +140,7 @@ If above statement works fine then your ansible setup is successful. And you are
 Use the **conditional playbook** to selectively install HammerDB, SwingBench, or both tools:
 
 ```shell
-# Install both tools (default behavior - reads benchmark_tool from inventory.yaml)
+# Install HammerDB only (default behavior - reads benchmark_tool from inventory.yaml)
 ansible-playbook -i inventory.yaml main_setup_conditional_benchmark.yml
 
 # Install only HammerDB
