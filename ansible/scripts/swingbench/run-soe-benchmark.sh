@@ -38,9 +38,15 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Convert RUN_TIME (minutes) to proper hours:minutes.seconds format
+RUNTIME_HOURS=$((RUN_TIME / 60))
+RUNTIME_MINUTES=$((RUN_TIME % 60))
+RUNTIME_FORMAT=$(printf "%d:%02d.00" $RUNTIME_HOURS $RUNTIME_MINUTES)
+
 # Run the SOE benchmark using charbench
 echo "Running SOE benchmark..." | tee -a "$RUN_LOG"
-echo "Command: ./charbench -c $SWINGBENCH_HOME/configs/SOE_Server_Side_V2.xml -u $SOE_USER -p *** -cs $ORACLE_SID -uc $USER_COUNT -rt ${RUN_TIME}:00.00 -v trans,tpm,tps,users,resp -r $RESULT_XML -csv $RESULT_CSV -a" | tee -a "$RUN_LOG"
+echo "Runtime format: $RUN_TIME minutes = $RUNTIME_FORMAT" | tee -a "$RUN_LOG"
+echo "Command: ./charbench -c $SWINGBENCH_HOME/configs/SOE_Server_Side_V2.xml -u $SOE_USER -p *** -cs $ORACLE_SID -uc $USER_COUNT -rt $RUNTIME_FORMAT -v trans,tpm,tps,users,resp -r $RESULT_XML -csv $RESULT_CSV -a" | tee -a "$RUN_LOG"
 
 ./charbench \
   -c "$SWINGBENCH_HOME/configs/SOE_Server_Side_V2.xml" \
@@ -48,7 +54,7 @@ echo "Command: ./charbench -c $SWINGBENCH_HOME/configs/SOE_Server_Side_V2.xml -u
   -p "$SOE_PASSWORD" \
   -cs "$ORACLE_SID" \
   -uc "$USER_COUNT" \
-  -rt "${RUN_TIME}:00.00" \
+  -rt "$RUNTIME_FORMAT" \
   -v trans,tpm,tps,users,resp \
   -r "$RESULT_XML" \
   -csv "$RESULT_CSV" \

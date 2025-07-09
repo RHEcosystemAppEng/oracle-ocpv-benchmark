@@ -60,13 +60,16 @@ This structure provides:
 │   └── swingbench/                # SwingBench benchmark scripts
 │       ├── .env                   # SwingBench environment configuration
 │       ├── simple-swingbench-test.sh  # Quick 30-second verification test
-│       ├── build-soe-schema.sh    # Build SOE schema
+│       ├── build-soe-schema.sh    # Build SOE schema (command line approach)
 │       ├── run-soe-benchmark.sh   # Run SOE benchmark
 │       ├── build-and-run-soe.sh   # Combined build and run
 │       ├── cleanup-soe-schema.sh  # SOE schema cleanup
 │       └── results/               # SwingBench benchmark results
 │           ├── swingbench_simple_test.log # Simple test results
+│           ├── swingbench_results_*.xml   # Simple test XML results
+│           ├── swingbench_latest_results.xml # Symlink to latest simple test
 │           ├── soe_schema_build_*.log # SOE schema build logs
+│           ├── soe_schema_test_*.xml  # Schema verification test results
 │           ├── soe_benchmark_run_*.log# SOE benchmark run logs
 │           ├── soe_results_*.xml      # XML result files
 │           ├── soe_results_*.csv      # CSV result files
@@ -191,9 +194,9 @@ cat results/soe_results_*.csv  # View CSV results
 ```
 
 ### SwingBench Script Descriptions
-- **`simple-swingbench-test.sh`**: Quick 30-second benchmark to verify SwingBench installation and SOE schema functionality
-- **`build-soe-schema.sh`**: Creates a fresh SOE (Sales Order Entry) schema for benchmarking
-- **`run-soe-benchmark.sh`**: Runs a configurable benchmark against the SOE schema
+- **`simple-swingbench-test.sh`**: Quick 30-second benchmark to verify SwingBench installation and SOE schema functionality (saves results to timestamped XML files)
+- **`build-soe-schema.sh`**: Creates a fresh SOE (Sales Order Entry) schema for benchmarking using direct command line parameters (no config files)
+- **`run-soe-benchmark.sh`**: Runs a configurable benchmark against the SOE schema (saves results to timestamped XML/CSV files)
 - **`cleanup-soe-schema.sh`**: Removes the SOE schema and related objects
 - **`build-and-run-soe.sh`**: Automated workflow that builds schema and runs benchmark
 

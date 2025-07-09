@@ -75,13 +75,26 @@ else
 fi
 
 echo "Attempting 2: Using SOE user credentials with charbench..."
+
+# Define the results file path with timestamp
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+RESULTS_XML_TARGET="$RESULTS_DIR/swingbench_results_${TIMESTAMP}.xml"
+
 ./charbench \
   -c ../configs/SOE_Server_Side_V2.xml \
   -cs "$ORACLE_SID" \
   -u "$SOE_USER" \
   -p "$SOE_PASSWORD" \
   -rt 0:0.30 \
+  -r "$RESULTS_XML_TARGET" \
   -a 2>&1 | tee "$SIMPLE_TEST_LOG"
+
+# Create a symlink to the latest results if the benchmark succeeded
+if [ -f "$RESULTS_XML_TARGET" ]; then
+    ln -sf "$RESULTS_XML_TARGET" "$RESULTS_DIR/swingbench_latest_results.xml"
+    echo "✅ Results XML saved to: $RESULTS_XML_TARGET"
+    echo "✅ Latest results symlink: $RESULTS_DIR/swingbench_latest_results.xml"
+fi
 
 if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo ""

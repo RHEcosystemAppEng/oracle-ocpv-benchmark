@@ -92,13 +92,16 @@ After deployment, the target VM will have this organized structure:
 │   └── swingbench/                             # SwingBench scripts + results
 │       ├── .env                                # Environment configuration
 │       ├── simple-swingbench-test.sh           # Quick verification test
-│       ├── build-soe-schema.sh                 # Schema creation
+│       ├── build-soe-schema.sh                 # Schema creation (command line approach)
 │       ├── run-soe-benchmark.sh                # Full benchmark execution
 │       ├── build-and-run-soe.sh                # Combined workflow
 │       ├── cleanup-soe-schema.sh               # Schema cleanup
 │       └── results/                            # Benchmark results directory
 │           ├── swingbench_simple_test.log      # Simple test results
+│           ├── swingbench_results_*.xml        # Simple test XML results
+│           ├── swingbench_latest_results.xml   # Symlink to latest simple test
 │           ├── soe_schema_build_*.log          # Schema build logs
+│           ├── soe_schema_test_*.xml           # Schema verification results
 │           ├── soe_benchmark_run_*.log         # Benchmark execution logs
 │           ├── soe_results_*.xml               # XML benchmark results
 │           └── soe_results_*.csv               # CSV benchmark results

@@ -49,6 +49,10 @@ mkdir -p "$RESULTS_DIR"
 # Log file for this build
 BUILD_LOG="$RESULTS_DIR/soe_schema_build_${BENCHMARK_NAME}.log"
 
+# Define the test results file path
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+TEST_RESULTS_XML="$RESULTS_DIR/soe_schema_test_${TIMESTAMP}.xml"
+
 echo "Build log: $BUILD_LOG"
 echo "Starting SOE schema build at $(date)" | tee "$BUILD_LOG"
 
@@ -69,70 +73,24 @@ echo "SELECT username, account_status, lock_date FROM dba_users WHERE username =
 echo "Dropping existing SOE schema if it exists..." | tee -a "$BUILD_LOG"
 echo "DROP USER soe CASCADE;" | sqlplus -S "sys/$ORACLE_SYS_PASSWORD@$ORACLE_SID as sysdba" 2>/dev/null || echo "SOE user did not exist or could not be dropped"
 
-# Step 4: Fix the missing oewizard.xml file issue
-echo "Fixing oewizard.xml config file..." | tee -a "$BUILD_LOG"
-
-WIZARDCONFIGS_DIR="../wizardconfigs"
-CONFIG_FILE="$WIZARDCONFIGS_DIR/oewizard.xml"
-
-# Check if config file exists
-if [ ! -f "$CONFIG_FILE" ]; then
-    echo "oewizard.xml not found, trying to restore from backup..." | tee -a "$BUILD_LOG"
-    
-    # Try to restore from the largest backup file (likely the original)
-    if [ -f "$WIZARDCONFIGS_DIR/oewizard.xml.temp" ]; then
-        echo "Restoring oewizard.xml from oewizard.xml.temp..." | tee -a "$BUILD_LOG"
-        cp "$WIZARDCONFIGS_DIR/oewizard.xml.temp" "$CONFIG_FILE"
-        echo "✅ Config file restored from backup" | tee -a "$BUILD_LOG"
-    elif [ -f "$WIZARDCONFIGS_DIR/oewizard.xml.backup.temp" ]; then
-        echo "Restoring oewizard.xml from oewizard.xml.backup.temp..." | tee -a "$BUILD_LOG"
-        cp "$WIZARDCONFIGS_DIR/oewizard.xml.backup.temp" "$CONFIG_FILE"
-        echo "✅ Config file restored from backup" | tee -a "$BUILD_LOG"
-    else
-        echo "Creating minimal oewizard.xml config file..." | tee -a "$BUILD_LOG"
-        cat > "$CONFIG_FILE" << EOF
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<SwingBenchConfiguration>
-  <Connection>
-    <UserName>$SOE_USER</UserName>
-    <Password>$SOE_PASSWORD</Password>
-    <ConnectString>$ORACLE_SID</ConnectString>
-    <DriverType>thin</DriverType>
-  </Connection>
-  <Settings>
-    <Scale>$SCALE_FACTOR</Scale>
-    <Compress>false</Compress>
-  </Settings>
-</SwingBenchConfiguration>
-EOF
-        echo "✅ Created minimal config file" | tee -a "$BUILD_LOG"
-    fi
-else
-    echo "✅ oewizard.xml config file already exists" | tee -a "$BUILD_LOG"
-fi
-
-# Verify the config file exists now
-if [ ! -f "$CONFIG_FILE" ]; then
-    echo "❌ ERROR: Could not create or restore oewizard.xml config file" | tee -a "$BUILD_LOG"
-    exit 1
-fi
-
-echo "Using oewizard with restored config file..." | tee -a "$BUILD_LOG"
-echo "Config file: $CONFIG_FILE" | tee -a "$BUILD_LOG"
-
+# Step 4: Run oewizard with command line parameters only (no config file)
+echo "Running oewizard with command line parameters only..." | tee -a "$BUILD_LOG"
 echo "Using command line parameters (following working script pattern):" | tee -a "$BUILD_LOG"
 echo "  DBA: sys as sysdba" | tee -a "$BUILD_LOG"
 echo "  Connection: $ORACLE_SID" | tee -a "$BUILD_LOG"
 echo "  Target User: $SOE_USER" | tee -a "$BUILD_LOG"
 echo "  Scale Factor: $SCALE_FACTOR" | tee -a "$BUILD_LOG"
 
-# Run oewizard with the restored config file
-echo "Running oewizard..." | tee -a "$BUILD_LOG"
+# Run oewizard with command line parameters only
+echo "Running oewizard (no config file)..." | tee -a "$BUILD_LOG"
+echo "Full oewizard command:" | tee -a "$BUILD_LOG"
+echo "./oewizard -dba \"sys as sysdba\" -dbap \"***\" -u \"soe\" -p \"soe\" -cs \"$ORACLE_SID\" -dt thin -create -scale \"$SCALE_FACTOR\" -cl" | tee -a "$BUILD_LOG"
+
 ./oewizard \
   -dba "sys as sysdba" \
   -dbap "$ORACLE_SYS_PASSWORD" \
-  -u "$SOE_USER" \
-  -p "$SOE_PASSWORD" \
+  -u "soe" \
+  -p "soe" \
   -cs "$ORACLE_SID" \
   -dt thin \
   -create \
@@ -160,16 +118,19 @@ if [ $OEWIZARD_EXIT_CODE -eq 0 ]; then
         
         # Try a quick test run (same as working script)
         echo "Running quick test to verify schema works with charbench..." | tee -a "$BUILD_LOG"
+        
         ./charbench \
           -c ../configs/SOE_Server_Side_V2.xml \
           -cs "$ORACLE_SID" \
           -u "$SOE_USER" \
           -p "$SOE_PASSWORD" \
           -rt 0:0.10 \
+          -r "$TEST_RESULTS_XML" \
           -a 2>&1 | tee -a "$BUILD_LOG"
         
         if [ ${PIPESTATUS[0]} -eq 0 ]; then
             echo "🎉 SUCCESS! SOE schema is fully functional for benchmarking!" | tee -a "$BUILD_LOG"
+            echo "✅ Schema test results saved to: $TEST_RESULTS_XML" | tee -a "$BUILD_LOG"
         else
             echo "⚠️  SOE schema created but benchmark test failed" | tee -a "$BUILD_LOG"
         fi
@@ -184,5 +145,9 @@ else
 fi
 
 echo "=================================================="
-echo "Build completed. Log file: $BUILD_LOG"
+echo "Build completed. Files created:"
+echo "- Build log: $BUILD_LOG"
+if [ -f "$TEST_RESULTS_XML" ]; then
+    echo "- Schema test results: $TEST_RESULTS_XML"
+fi
 echo "==================================================" 

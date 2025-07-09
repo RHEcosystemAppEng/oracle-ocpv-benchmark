@@ -83,19 +83,27 @@ export SCALE_FACTOR=5
 ## Available Scripts
 
 - **`simple-swingbench-test.sh`**: Quick 30-second benchmark to verify SwingBench installation and SOE schema functionality
-- **`build-soe-schema.sh`**: Creates a fresh SOE (Sales Order Entry) schema for benchmarking
+- **`build-soe-schema.sh`**: Creates a fresh SOE (Sales Order Entry) schema for benchmarking using command line parameters
 - **`run-soe-benchmark.sh`**: Runs a configurable benchmark against the SOE schema
 - **`cleanup-soe-schema.sh`**: Removes the SOE schema and related objects
 - **`build-and-run-soe.sh`**: Automated workflow that builds schema and runs benchmark
 
 ## Results
 
-All benchmark results are saved to `/opt/ocpv-benchmark/scripts/swingbench/results/` with the following files:
+All benchmark results are saved to `/opt/ocpv-benchmark/scripts/swingbench/results/` with timestamped filenames:
 
+### Test Results Files
 - **`swingbench_simple_test.log`**: Simple test output
+- **`swingbench_results_YYYYMMDD_HHMMSS.xml`**: Simple test XML results
+- **`swingbench_latest_results.xml`**: Symlink to latest simple test results
+
+### Schema Build Results
 - **`soe_schema_build_YYYYMMDD_HHMMSS.log`**: Schema build logs
+- **`soe_schema_test_YYYYMMDD_HHMMSS.xml`**: Schema verification test XML results
+
+### Benchmark Results
 - **`soe_benchmark_run_YYYYMMDD_HHMMSS.log`**: Benchmark run logs
-- **`soe_results_YYYYMMDD_HHMMSS.xml`**: XML results
+- **`soe_results_YYYYMMDD_HHMMSS.xml`**: XML results with detailed metrics
 - **`soe_results_YYYYMMDD_HHMMSS.csv`**: CSV results with key metrics (TPS, Response Time, Error Rate)
 
 ## Notes
@@ -110,6 +118,8 @@ Tests run longer than specified `RUN_TIME` due to ramp-up/down phases. `RUN_TIME
 
 **Monitor tests**: `tail -f /opt/ocpv-benchmark/scripts/swingbench/results/soe_benchmark_run_*.log`
 
-**Config file issues**: Scripts automatically restore SwingBench config files from backups
+**Schema creation**: Scripts use command line parameters to create schemas directly with oewizard (no config files needed)
+
+**Results location**: All XML results are automatically saved to the results directory with timestamped filenames
 
 **Java version**: Ensure Java 11 is installed: `java -version` 

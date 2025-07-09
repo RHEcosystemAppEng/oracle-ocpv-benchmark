@@ -38,6 +38,7 @@ all:
         tns_admin_path: /opt/ocpv-benchmark/tns
         system_user: cloud-user
         system_group: cloud-user
+        user_home_path: /home/cloud-user
         
         # Oracle Client Configuration  
         oracle_major_version: 19.26
