@@ -74,44 +74,212 @@ ssh rhel@localhost -p 2222
 ```
 
 Now add below VM to ansible inventory.yaml. `ansible_ssh_private_key_file` is the private key to do the ssh in to VM. This path and necessary fields needs to be corrected as per your scenario.
+
+All configuration variables are now consolidated in the inventory file for easier management:
+
 ```yaml
-hammerdb_oracle_client_vms:
-  hosts:
-    oralab_vm1:
-      ansible_host: 127.0.0.1
-      ansible_user: rhel
-      ansible_ssh_private_key_file: ~/rac-ocpv.pem
-      ansible_port: 2222
-      ansible_python_interpreter: /usr/libexec/platform-python
+all:
+  children:
+    oracle_benchmark_client_vms:
+      hosts:
+        oralab_vm1:
+          ansible_host: 127.0.0.1
+          ansible_user: rhel
+          ansible_ssh_private_key_file: ~/rac-ocpv.pem
+          ansible_port: 2222
+          ansible_python_interpreter: /usr/libexec/platform-python
+      vars:
+        # Benchmark Tool Selection (enum-like variable)
+        # Valid values: "hammerdb", "swingbench", "all"
+        benchmark_tool: "hammerdb"  # Default: installs HammerDB only
+        
+        # SwingBench Configuration
+        swingbench_version: 25052023_jdk11
+        swingbench_url: "https://github.com/domgiles/swingbench-public/releases/download/historic/swingbench{{ swingbench_version }}.zip"
+        required_java_version: "11"
+        
+        # HammerDB Configuration
+        hammerdb_version: 4.12
+        
+        # TNS Configuration
+        default_tns_entry: "ORALAB_STANDALONE"
+        oracle_tns_entries:
+          - tns_name: "ORALAB"
+            host: <oralab-oracle-rac host name>
+            port: "1521"
+            sid: "pdb1"
+          - tns_name: "ORALAB_STANDALONE"
+            host: <oralab-oracle-standalone host name>
+            port: "1521"
+            sid: "pdb1"
+        
+        # System Configuration
+        benchmark_base_path: /opt/ocpv-benchmark
+        scripts_base_path: /opt/ocpv-benchmark/scripts
+        tns_admin_path: /opt/ocpv-benchmark/tns
+        system_user: cloud-user
+        system_group: cloud-user
+        
+        # Oracle Client Configuration  
+        oracle_major_version: 19.26
+        oracle_minor_version: 0.0.0-1.el8
+        oracle_home_path: /usr/lib/oracle/19.26/client64
 ```
 
 Check if the ansible able to reach the VM by doing below `ping` test
 ```shell
-ansible -i inventory.yaml -m ping hammerdb_oracle_client_vms
+ansible -i inventory.yaml -m ping oracle_benchmark_client_vms
 ```
 
 If above statement works fine then your ansible setup is successful. And you are good to execute the playbooks and desired vm and should be able to set up with Hammerdb oracle benchmark.
 
-### Setting up the oracle client and hammerdb using Ansible playbooks
+### Setting up the Oracle client and benchmark tools using Ansible playbooks
 
-If you would like to install everything. This is ideally recommended for the new vm or if you haven't setup hammerdb or oracle client.
-You can run below commands from ansible directory
+#### NEW: Conditional Benchmark Tool Installation
+
+Use the **conditional playbook** to selectively install HammerDB, SwingBench, or both tools:
+
 ```shell
-ansible-playbook -i inventory.yaml main_setup_oracle_hammerdb_benchmark.yml
+# Install HammerDB only (default behavior - reads benchmark_tool from inventory.yaml)
+ansible-playbook -i inventory.yaml main_setup_conditional_benchmark.yml
+
+# Install only HammerDB
+ansible-playbook -i inventory.yaml main_setup_conditional_benchmark.yml -e benchmark_tool=hammerdb
+
+# Install only SwingBench  
+ansible-playbook -i inventory.yaml main_setup_conditional_benchmark.yml -e benchmark_tool=swingbench
+
+# Explicitly install both tools
+ansible-playbook -i inventory.yaml main_setup_conditional_benchmark.yml -e benchmark_tool=all
 ```
 
-You can also run individual playbooks to set up any of these as desired
+#### Legacy Playbooks (Still Available)
+
+If you prefer the original approach, you can still use the individual tool playbooks:
+
 ```shell
-# Run below command to run oracle client
+# Complete HammerDB setup (Oracle client + TNS + HammerDB)
+ansible-playbook -i inventory.yaml main_setup_oracle_hammerdb_benchmark.yml
+
+# Complete SwingBench setup (Oracle client + TNS + SwingBench)
+ansible-playbook -i inventory.yaml main_setup_oracle_swingbench_benchmark.yml
+
+# Complete installation (Oracle client + TNS + both tools)
+ansible-playbook -i inventory.yaml main_setup_complete_benchmark_suite.yml
+```
+
+#### Individual Component Playbooks
+
+You can also run individual playbooks to set up specific components:
+```shell
+# Install Oracle Instant Client only
 ansible-playbook -i inventory.yaml playbooks/oracle-client/install_oracle_client.yml
 
-# Run below command to configure tnsnames.ora file so that hammerdb can refer it.
+# Configure TNS names only
 ansible-playbook -i inventory.yaml playbooks/configure-tnsnames/configure_tnsnames.yml
 
-# Run below command to set up and configure the hammerdb for oracle benchmark.
+# Install HammerDB only (requires Oracle client)
 ansible-playbook -i inventory.yaml playbooks/setup-hammerdb/install_setup_hammer_db.yml
+
+# Install SwingBench only (requires Oracle client) 
+ansible-playbook -i inventory.yaml playbooks/setup-swingbench/install_setup_swingbench.yml
 ```
 
+#### Variable Configuration
+
+All variables are in `inventory.yaml`. To customize:
+
+1. **Change benchmark tool selection**: Modify `benchmark_tool` in inventory.yaml
+2. **Update Oracle connectivity**: Modify `oracle_tns_entries` section
+3. **Change tool versions**: Update `hammerdb_version` or `swingbench_version`
+4. **Modify paths**: Update `benchmark_base_path` and related paths
+
+## Running SwingBench Benchmarks
+
+After installation, SwingBench provides several ready-to-use scripts:
+
+### Available Scripts
+
+```shell
+# Navigate to SwingBench scripts directory
+cd /opt/ocpv-benchmark/scripts/swingbench
+
+# Quick verification test (30-second benchmark)
+./simple-swingbench-test.sh
+
+# Create/rebuild SOE schema
+./build-soe-schema.sh
+
+# Run full benchmark
+./run-soe-benchmark.sh
+
+# Clean up SOE schema
+./cleanup-soe-schema.sh
+
+# Complete workflow (build schema + run benchmark)
+./build-and-run-soe.sh
+```
+
+### Script Descriptions
+
+- **`simple-swingbench-test.sh`**: Quick 30-second benchmark to verify SwingBench installation and SOE schema functionality
+- **`build-soe-schema.sh`**: Creates a fresh SOE (Sales Order Entry) schema for benchmarking
+- **`run-soe-benchmark.sh`**: Runs a configurable benchmark against the SOE schema
+- **`cleanup-soe-schema.sh`**: Removes the SOE schema and related objects
+- **`build-and-run-soe.sh`**: Automated workflow that builds schema and runs benchmark
+
+### Configuration
+
+All scripts use environment variables from `.env` file in the SwingBench scripts directory:
+
+```bash
+# Example configuration (automatically created by Ansible)
+export SWINGBENCH_HOME=/opt/ocpv-benchmark/swingbench/25052023_jdk11
+export RESULTS_DIR=/opt/ocpv-benchmark/scripts/swingbench/results
+export ORACLE_SID=ORALAB_STANDALONE
+export SOE_USER=soe
+export SOE_PASSWORD=Chang4On
+export SCALE_FACTOR=1
+export USER_COUNT=4
+export RUN_TIME=1
+```
+
+### Results Location
+
+All benchmark results are saved to the results directory on the client VM:
+
+```bash
+# Results directory structure
+/opt/ocpv-benchmark/scripts/swingbench/results/
+├── swingbench_simple_test.log               # Simple test output
+├── soe_schema_build_YYYYMMDD_HHMMSS.log    # Schema build logs
+├── soe_benchmark_run_YYYYMMDD_HHMMSS.log   # Benchmark run logs
+├── soe_results_YYYYMMDD_HHMMSS.xml         # XML results
+└── soe_results_YYYYMMDD_HHMMSS.csv         # CSV results
+```
+
+### Viewing Results
+
+```shell
+# View recent results
+cd /opt/ocpv-benchmark/scripts/swingbench/results
+ls -la
+
+# View CSV results (contains performance metrics)
+cat soe_results_*.csv
+
+# View detailed logs
+tail -f soe_benchmark_run_*.log
+```
+
+## Running HammerDB Benchmarks
+
+For HammerDB usage, navigate to the HammerDB scripts directory:
+
+```shell
+cd /opt/ocpv-benchmark/scripts/hammerdb
+# Follow existing HammerDB documentation
+```
 
 ## Debugging hammerdb issues
 Refresh hammerdb cache if the test does not reflect your configuration changes.
@@ -120,27 +288,27 @@ Refresh hammerdb cache if the test does not reflect your configuration changes.
 rm /tmp/database.db
 ```
 
-Often hammerdb loads the default configurations so it is useful to see the effective configuration using below commands.
+## Troubleshooting
+
+### SwingBench Issues
+
+1. **Config file errors**: SwingBench automatically restores config files from backups
+2. **Connection issues**: Verify TNS configuration and Oracle connectivity
+3. **Permission issues**: Ensure proper file permissions on scripts directory
+4. **Java version**: SwingBench requires Java 11
+
+### Common Solutions
+
 ```shell
-#run in interactive mode
-./hammerdbcli
+# Test database connectivity
+sqlplus sys/password@TNS_NAME as sysdba
 
-#enter below command to see all the effective configurations.
-print dict
-```
+# Check Java version
+java -version
 
-## Some helpful Oracle commands
+# Verify SwingBench installation
+ls -la /opt/ocpv-benchmark/swingbench/25052023_jdk11/bin/
 
-```shell
-# Once the setup is done validate if the tnsnames.ora is correctly configured and able to access oracle cluster.
-export TNS_ADMIN=/etc/Hammerdb-oracle-tns/
-sqlplus sys/<PASSWORD>@ORALAB as sysdba
-
-# Creates the user tpcc and grants permissions
-CREATE USER tpcc IDENTIFIED BY <tpcc password>;
-GRANT CONNECT, RESOURCE, CREATE SESSION TO tpcc;
-GRANT DROP, CREATE ANY TABLE TO tpcc;
-
-# drops the user tpcc
-DROP USER tpcc CASCADE;
+# Check script permissions
+chmod +x /opt/ocpv-benchmark/scripts/swingbench/*.sh
 ```

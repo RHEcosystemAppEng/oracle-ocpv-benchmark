@@ -1,5 +1,5 @@
 - name: Install Oracle Instant Client
-  hosts: hammerdb_oracle_client_vms
+  hosts: oracle_benchmark_client_vms
   become: yes
   vars:
     tmp_dir: "/tmp"
@@ -69,3 +69,49 @@
           ❌ Oracle Instant Client installation directory not found at {{ oracle_home_path }}.
           Something went wrong during the installation.
           {% endif %}
+
+
+
+    - name: Create benchmark directory
+      file:
+        path: "{{ benchmark_base_path }}"
+        state: directory
+        mode: '0755'
+        owner: "{{ system_user }}"
+        group: "{{ system_group }}"
+
+    - name: Create TNS directory
+      file:
+        path: "{{ tns_admin_path }}"
+        state: directory
+        mode: '0755'
+        owner: "{{ system_user }}"
+        group: "{{ system_group }}"
+
+    - name: Get user home directory
+      shell: "getent passwd {{ system_user }} | cut -d: -f6"
+      register: user_home_result
+      changed_when: false
+
+    - name: Set user home path fact
+      set_fact:
+        dynamic_user_home: "{{ user_home_result.stdout }}"
+
+    - name: Set environment variables for Oracle client
+      lineinfile:
+        path: "{{ dynamic_user_home }}/.bash_profile"
+        line: "{{ item }}"
+        create: yes
+        owner: "{{ system_user }}"
+        group: "{{ system_group }}"
+      loop:
+        - "export ORACLE_HOME={{ oracle_home_path }}"
+        - "export PATH=$PATH:$ORACLE_HOME/bin"
+        - "export LD_LIBRARY_PATH=$ORACLE_HOME/lib:$LD_LIBRARY_PATH"
+        - "export TNS_ADMIN={{ tns_admin_path }}"
+
+    - name: Source the updated .bash_profile
+      shell: "source {{ dynamic_user_home }}/.bash_profile"
+      args:
+        executable: /bin/bash
+      become_user: "{{ system_user }}"

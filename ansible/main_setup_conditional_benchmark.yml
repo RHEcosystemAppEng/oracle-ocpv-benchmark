@@ -1,0 +1,59 @@
+---
+# Conditional OCPV Benchmark Setup
+# This playbook installs benchmark tools based on the benchmark_tool variable
+#
+# Valid values: "hammerdb", "swingbench", "all"
+# 
+# DEFAULT BEHAVIOR (when benchmark_tool variable is not specified):
+#   - Installs HammerDB only
+#   - Does NOT install SwingBench
+#   - Always installs Oracle Client and TNS configuration
+#
+# Usage examples:
+#   # Install HammerDB only (default - no variable needed)
+#   ansible-playbook -i inventory.yaml main_setup_conditional_benchmark.yml
+#   
+#   # Install HammerDB only (explicit)
+#   ansible-playbook -i inventory.yaml main_setup_conditional_benchmark.yml -e benchmark_tool=hammerdb
+#   
+#   # Install SwingBench only
+#   ansible-playbook -i inventory.yaml main_setup_conditional_benchmark.yml -e benchmark_tool=swingbench
+#   
+#   # Install both HammerDB and SwingBench
+#   ansible-playbook -i inventory.yaml main_setup_conditional_benchmark.yml -e benchmark_tool=all
+
+# Always install Oracle client and TNS configuration
+- import_playbook: playbooks/oracle-client/install_oracle_client.yml
+- import_playbook: playbooks/configure-tnsnames/configure_tnsnames.yml
+
+# Conditional benchmark tool installation
+- name: Install Benchmark Tools Based on Selection
+  hosts: oracle_benchmark_client_vms
+  become: yes
+  tasks:
+    - name: Display installation plan
+      debug:
+        msg: |
+          🚀 Installation Plan:
+          - Benchmark tool selection: {{ benchmark_tool | default('hammerdb') }}{% if not benchmark_tool %} (default - no variable specified){% endif %}
+          {% if benchmark_tool | default('hammerdb') in ['hammerdb', 'all'] %}
+          - ✅ HammerDB {{ hammerdb_version }} will be installed
+          {% endif %}
+          {% if benchmark_tool | default('hammerdb') in ['swingbench', 'all'] %}
+          - ✅ SwingBench {{ swingbench_version }} will be installed
+          {% else %}
+          - ❌ SwingBench will NOT be installed
+          {% endif %}
+          - 📁 Base path: {{ benchmark_base_path }}
+          - 📁 Scripts path: {{ scripts_base_path }}
+          - 🔧 Oracle Client and TNS will always be installed
+
+# Conditional HammerDB installation
+- name: Install and Setup HammerDB for Oracle Benchmark
+  import_playbook: playbooks/setup-hammerdb/install_setup_hammer_db.yml
+  when: benchmark_tool | default('hammerdb') in ['hammerdb', 'all']
+
+# Conditional SwingBench installation
+- name: Install and Setup SwingBench for Oracle Benchmark
+  import_playbook: playbooks/setup-swingbench/install_setup_swingbench.yml
+  when: benchmark_tool | default('hammerdb') in ['swingbench', 'all']

@@ -57,7 +57,7 @@ loadscript
 # Oracle DB connection
 diset connection system_user system
 diset connection system_password $env(ORACLE_SYSTEM_PASSWORD)
-diset connection instance [expr {[info exists ::env(ORACLE_INSTANCE)] ? $::env(ORACLE_INSTANCE) : "oralab"}]
+diset connection instance [expr {[info exists ::env(ORACLE_SID)] ? $::env(ORACLE_SID) : "oralab"}]
 
 diset tpcc ora_driver       timed
 diset tpcc count_ware       [expr {[info exists ::env(ORA_COUNT_WARE)] ? $::env(ORA_COUNT_WARE) : 1000}]

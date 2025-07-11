@@ -1,0 +1,16 @@
+---
+# Complete OCPV Benchmark Suite Setup
+# This playbook installs and configures the complete Oracle benchmarking environment
+# including Oracle client, TNS configuration, HammerDB, and SwingBench
+
+- name: Install Oracle Instant Client and SQLPlus
+  import_playbook: playbooks/oracle-client/install_oracle_client.yml
+
+- name: Configure TNS names for Oracle connectivity
+  import_playbook: playbooks/configure-tnsnames/configure_tnsnames.yml
+
+- name: Install and setup HammerDB for TPC-C benchmarks
+  import_playbook: playbooks/setup-hammerdb/install_setup_hammer_db.yml
+
+- name: Install and setup SwingBench for SOE benchmarks
+  import_playbook: playbooks/setup-swingbench/install_setup_swingbench.yml 

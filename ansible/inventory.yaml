@@ -1,6 +1,6 @@
 all:
   children:
-    hammerdb_oracle_client_vms:
+    oracle_benchmark_client_vms:
       hosts:
         oralab_vm1:
           ansible_host: <control machine ip or host>
@@ -8,7 +8,20 @@ all:
           ansible_ssh_private_key_file: < path of ansible_ssh_private_key_file like .pem file>
           ansible_python_interpreter: /usr/libexec/platform-python
       vars:
-        # TNS Configuration (multiple entries)
+        # Benchmark Tool Selection (enum-like variable)
+        # Valid values: "hammerdb", "swingbench", "all"
+        benchmark_tool: "hammerdb"  # Default: installs HammerDB only
+        
+        # SwingBench Configuration
+        swingbench_version: 25052023_jdk11
+        swingbench_url: "https://github.com/domgiles/swingbench-public/releases/download/historic/swingbench{{ swingbench_version }}.zip"
+        required_java_version: "11"
+        
+        # HammerDB Configuration
+        hammerdb_version: 4.12
+        
+        # TNS Configuration
+        default_tns_entry: "ORALAB_STANDALONE"
         oracle_tns_entries:
           - tns_name: "ORALAB"
             host: <oralab-oracle-rac host name>
@@ -18,16 +31,16 @@ all:
             host: <oralab-oracle-standalone host name>
             port: "1521"
             sid: "pdb1"
-
-        tns_admin_path: /opt/HammerDB/hammerdb-oracle-tns
-
-        # Oracle Client Installation
+        
+        # System Configuration
+        benchmark_base_path: /opt/ocpv-benchmark
+        scripts_base_path: /opt/ocpv-benchmark/scripts
+        tns_admin_path: /opt/ocpv-benchmark/tns
+        system_user: cloud-user
+        system_group: cloud-user
+        user_home_path: /home/cloud-user
+        
+        # Oracle Client Configuration  
         oracle_major_version: 19.26
         oracle_minor_version: 0.0.0-1.el8
-        base_url: https://yum.oracle.com/repo/OracleLinux/OL8/oracle/instantclient/x86_64/getPackage
         oracle_home_path: /usr/lib/oracle/19.26/client64
-
-        # HammerDB Setup
-        hammerdb_version: 4.12
-        hammerdb_base_path: /opt/HammerDB
-        oracle_client_home: /usr/lib/oracle/19.26/client64
