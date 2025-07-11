@@ -55,14 +55,17 @@ echo "Command: ./charbench -c $SWINGBENCH_HOME/configs/SOE_Server_Side_V2.xml -u
   -cs "$ORACLE_SID" \
   -uc "$USER_COUNT" \
   -rt "$RUNTIME_FORMAT" \
-  -v trans,tpm,tps,users,resp \
+  -bs 00:02.00 \
+  -v trans,tpm,tps,users,resp,errs \
   -r "$RESULT_XML" \
   -csv "$RESULT_CSV" \
-  -a 2>&1 | tee -a "$RUN_LOG"
+  -a \
+  -v \
+   2>&1 | tee -a "$RUN_LOG"
 
 if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo "✅ SOE benchmark completed successfully at $(date)" | tee -a "$RUN_LOG"
-    
+
     # Display summary from CSV if available
     if [ -f "$RESULT_CSV" ]; then
         echo "=================================================="
@@ -80,4 +83,4 @@ echo "Benchmark completed. Results available at:"
 echo "- Log: $RUN_LOG"
 echo "- XML: $RESULT_XML"
 echo "- CSV: $RESULT_CSV"
-echo "==================================================" 
+echo "=================================================="

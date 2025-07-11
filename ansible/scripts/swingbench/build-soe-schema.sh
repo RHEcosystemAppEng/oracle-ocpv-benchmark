@@ -84,7 +84,9 @@ echo "  Scale Factor: $SCALE_FACTOR" | tee -a "$BUILD_LOG"
 # Run oewizard with command line parameters only
 echo "Running oewizard (no config file)..." | tee -a "$BUILD_LOG"
 echo "Full oewizard command:" | tee -a "$BUILD_LOG"
-echo "./oewizard -dba \"sys as sysdba\" -dbap \"***\" -u \"soe\" -p \"soe\" -cs \"$ORACLE_SID\" -dt thin -create -scale \"$SCALE_FACTOR\" -cl" | tee -a "$BUILD_LOG"
+
+
+echo "./oewizard -dba \"sys as sysdba\" -dbap \"***\" -u \"soe\" -p \"soe\" -cs \"$ORACLE_SID\" -dt thin -create -scale \"$SCALE_FACTOR\" -ts USERS -cl" | tee -a "$BUILD_LOG"
 
 ./oewizard \
   -dba "sys as sysdba" \
@@ -95,30 +97,32 @@ echo "./oewizard -dba \"sys as sysdba\" -dbap \"***\" -u \"soe\" -p \"soe\" -cs 
   -dt thin \
   -create \
   -scale "$SCALE_FACTOR" \
+  -ts USERS \
   -cl 2>&1 | tee -a "$BUILD_LOG"
+
 
 OEWIZARD_EXIT_CODE=${PIPESTATUS[0]}
 
 if [ $OEWIZARD_EXIT_CODE -eq 0 ]; then
     echo "✅ SOE schema build completed successfully at $(date)" | tee -a "$BUILD_LOG"
-    
+
     # Test the newly created schema (same as working script)
     echo "Testing new SOE schema..." | tee -a "$BUILD_LOG"
     echo "Trying to unlock SOE user and reset password..." | tee -a "$BUILD_LOG"
     echo "ALTER USER soe ACCOUNT UNLOCK;" | sqlplus -S "sys/$ORACLE_SYS_PASSWORD@$ORACLE_SID as sysdba" | tee -a "$BUILD_LOG"
     echo "ALTER USER soe IDENTIFIED BY $SOE_PASSWORD;" | sqlplus -S "sys/$ORACLE_SYS_PASSWORD@$ORACLE_SID as sysdba" | tee -a "$BUILD_LOG"
-    
+
     echo "Testing SOE user connection directly..." | tee -a "$BUILD_LOG"
     echo "SELECT 'SOE Schema Test Successful' as result FROM dual;" | sqlplus -S "$SOE_USER/$SOE_PASSWORD@$ORACLE_SID" | tee -a "$BUILD_LOG"
-    
+
     if [ ${PIPESTATUS[0]} -eq 0 ]; then
         echo "✅ SOE schema is accessible and working!" | tee -a "$BUILD_LOG"
         echo "Schema: $SOE_USER/$SOE_PASSWORD" | tee -a "$BUILD_LOG"
         echo "Scale Factor: $SCALE_FACTOR" | tee -a "$BUILD_LOG"
-        
+
         # Try a quick test run (same as working script)
         echo "Running quick test to verify schema works with charbench..." | tee -a "$BUILD_LOG"
-        
+
         ./charbench \
           -c ../configs/SOE_Server_Side_V2.xml \
           -cs "$ORACLE_SID" \
@@ -127,7 +131,7 @@ if [ $OEWIZARD_EXIT_CODE -eq 0 ]; then
           -rt 0:0.10 \
           -r "$TEST_RESULTS_XML" \
           -a 2>&1 | tee -a "$BUILD_LOG"
-        
+
         if [ ${PIPESTATUS[0]} -eq 0 ]; then
             echo "🎉 SUCCESS! SOE schema is fully functional for benchmarking!" | tee -a "$BUILD_LOG"
             echo "✅ Schema test results saved to: $TEST_RESULTS_XML" | tee -a "$BUILD_LOG"
@@ -150,4 +154,4 @@ echo "- Build log: $BUILD_LOG"
 if [ -f "$TEST_RESULTS_XML" ]; then
     echo "- Schema test results: $TEST_RESULTS_XML"
 fi
-echo "==================================================" 
+echo "=================================================="
