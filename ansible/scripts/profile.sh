@@ -43,8 +43,8 @@ case "$PROFILE" in
     export ORA_COUNT_WARE=1000
     export ORA_RAMPUP=5
     export ORA_DURATION=20
-    export ORA_ALLWAREHOUSE=true
-    export HDB_PROFILE_ID=400
+    export ORA_ALLWAREHOUSE=false
+    export HDB_PROFILE_ID=4              # Logical sequence for XL profile
     echo "XLarge profile: High-intensity stress test (25 min total)"
     ;;
 
@@ -53,9 +53,9 @@ case "$PROFILE" in
     export ORA_COUNT_WARE=500
     export VU_LIST="20 40 60 80 100"       # More granular scaling steps
     export ORA_RAMPUP=3                    # Faster rampup for multiple runs
-    export ORA_DURATION=10                 # Shorter duration for multiple tests
-    export ORA_ALLWAREHOUSE=true           # Essential for scaling tests
-    export HDB_PROFILE_ID=500
+    export ORA_DURATION=20                 # Shorter duration for multiple tests
+    export ORA_ALLWAREHOUSE=false           # Essential for scaling tests
+    export HDB_PROFILE_ID=5              # Logical sequence for scale-run profile
     echo "Scale-run profile: Multi-VU capacity planning"
     ;;
 
@@ -76,8 +76,8 @@ case "$PROFILE" in
     export ORA_COUNT_WARE=200
     export ORA_RAMPUP=5
     export ORA_DURATION=60                 # 1-hour test
-    export ORA_ALLWAREHOUSE=true
-    export HDB_PROFILE_ID=600
+    export ORA_ALLWAREHOUSE=false
+    export HDB_PROFILE_ID=6              # Logical sequence for endurance profile
     echo "Endurance profile: Long-running stability test (65 min total)"
     ;;
 
