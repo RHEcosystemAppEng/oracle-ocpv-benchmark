@@ -69,9 +69,14 @@ echo "SELECT username FROM dba_users WHERE username = 'SOE';" | sqlplus -S "sys/
 echo "Checking SOE user status (locked/unlocked)..." | tee -a "$BUILD_LOG"
 echo "SELECT username, account_status, lock_date FROM dba_users WHERE username = 'SOE';" | sqlplus -S "sys/$ORACLE_SYS_PASSWORD@$ORACLE_SID as sysdba"
 
-# Step 3: Drop existing SOE schema if it exists (clean slate)
-echo "Dropping existing SOE schema if it exists..." | tee -a "$BUILD_LOG"
-echo "DROP USER soe CASCADE;" | sqlplus -S "sys/$ORACLE_SYS_PASSWORD@$ORACLE_SID as sysdba" 2>/dev/null || echo "SOE user did not exist or could not be dropped"
+# Step 3: Conditionally drop existing SOE schema
+if [ "${DROP_SOE_SCHEMA_FOR_EACH_BENCHMARK:-false}" = "true" ]; then
+    echo "Dropping existing SOE schema (DROP_SOE_SCHEMA_FOR_EACH_BENCHMARK=true)..." | tee -a "$BUILD_LOG"
+    echo "DROP USER soe CASCADE;" | sqlplus -S "sys/$ORACLE_SYS_PASSWORD@$ORACLE_SID as sysdba" 2>/dev/null || echo "SOE user did not exist or could not be dropped"
+else
+    echo "Skipping SOE schema drop (DROP_SOE_SCHEMA_FOR_EACH_BENCHMARK=false)..." | tee -a "$BUILD_LOG"
+    echo "⚠️  Will attempt to create/update SOE schema without dropping existing one" | tee -a "$BUILD_LOG"
+fi
 
 # Step 4: Run oewizard with command line parameters only (no config file)
 echo "Running oewizard with command line parameters only..." | tee -a "$BUILD_LOG"

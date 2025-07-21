@@ -4,8 +4,20 @@ set -euo pipefail
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Store any pre-set values that might be overridden by scaling scripts
+PRESET_USER_COUNT="${USER_COUNT:-}"
+PRESET_BENCHMARK_NAME="${BENCHMARK_NAME:-}"
+
 # Source environment variables from the same directory as the script
 source "$SCRIPT_DIR/.env"
+
+# Restore any pre-set values (scaling script overrides take precedence)
+if [ -n "$PRESET_USER_COUNT" ]; then
+    export USER_COUNT="$PRESET_USER_COUNT"
+fi
+if [ -n "$PRESET_BENCHMARK_NAME" ]; then
+    export BENCHMARK_NAME="$PRESET_BENCHMARK_NAME"
+fi
 
 echo "=================================================="
 echo "SwingBench SOE Benchmark Starting"
@@ -43,10 +55,15 @@ RUNTIME_HOURS=$((RUN_TIME / 60))
 RUNTIME_MINUTES=$((RUN_TIME % 60))
 RUNTIME_FORMAT=$(printf "%d:%02d.00" $RUNTIME_HOURS $RUNTIME_MINUTES)
 
+# Ramp-up time: 1 minute for users to establish connections and stabilize workload
+RAMPUP_TIME="00:01.00"
+
 # Run the SOE benchmark using charbench
 echo "Running SOE benchmark..." | tee -a "$RUN_LOG"
 echo "Runtime format: $RUN_TIME minutes = $RUNTIME_FORMAT" | tee -a "$RUN_LOG"
-echo "Command: ./charbench -c $SWINGBENCH_HOME/configs/SOE_Server_Side_V2.xml -u $SOE_USER -p *** -cs $ORACLE_SID -uc $USER_COUNT -rt $RUNTIME_FORMAT -v trans,tpm,tps,users,resp -r $RESULT_XML -csv $RESULT_CSV -a" | tee -a "$RUN_LOG"
+echo "Ramp-up time: 1 minute (statistics recording starts after ramp-up)" | tee -a "$RUN_LOG"
+echo "Total execution time: ~$((RUN_TIME + 1)) minutes (including 1-minute ramp-up)" | tee -a "$RUN_LOG"
+echo "Command: ./charbench -c $SWINGBENCH_HOME/configs/SOE_Server_Side_V2.xml -u $SOE_USER -p *** -cs $ORACLE_SID -uc $USER_COUNT -rt $RUNTIME_FORMAT -bs $RAMPUP_TIME -r $RESULT_XML -csv $RESULT_CSV -a" | tee -a "$RUN_LOG"
 
 ./charbench \
   -c "$SWINGBENCH_HOME/configs/SOE_Server_Side_V2.xml" \
@@ -55,11 +72,12 @@ echo "Command: ./charbench -c $SWINGBENCH_HOME/configs/SOE_Server_Side_V2.xml -u
   -cs "$ORACLE_SID" \
   -uc "$USER_COUNT" \
   -rt "$RUNTIME_FORMAT" \
-  -bs 00:02.00 \
+  -bs "$RAMPUP_TIME" \
   -v trans,tpm,tps,users,resp,errs \
   -r "$RESULT_XML" \
   -csv "$RESULT_CSV" \
-  -a \
+  -debug \
+  -v \
   -v \
    2>&1 | tee -a "$RUN_LOG"
 
