@@ -3,6 +3,10 @@
 This repo automates the setup and execution of **HammerDB TPC-C benchmarks** against Oracle databases.We leverage Ansible for provisioning and configuring the environment, enabling automated benchmark execution. 
 The solution also provides instructions on how to integrate Oracle's Observability Exporter with Grafana to create an OpenShift-native observability stack. Our primary objective is to automate Oracle performance testing on RHEL VMs provisioned via OpenShift Virtualization
 
+
+> [!NOTE]
+> 📢📢📢 **Red Hat Validation**: These benchmarks have been used by Red Hat to validate the solution on OpenShift Virtualization. For details, refer to http://redhat.com/en/blog/single-instance-oracle-database-openshift-virtualization, and contact Red Hat for further details.
+
 ## Project Functionality
 
 This project provides the necessary tooling to automate **Oracle TPC-C benchmark runs** using [HammerDB](https://hammerdb.com/). Included **Ansible playbooks** handle:
